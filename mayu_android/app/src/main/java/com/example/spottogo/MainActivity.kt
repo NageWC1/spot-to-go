@@ -12,6 +12,7 @@ import androidx.compose.runtime.setValue
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.spottogo.data.AuthRepository
 import com.example.spottogo.data.Restaurant
 import com.example.spottogo.ui.contact.ContactUsScreen
 import com.example.spottogo.ui.directions.DirectionsScreen
@@ -48,7 +49,9 @@ fun AppNavigation() {
         composable("splash") {
             SplashScreen(
                 onSplashComplete = {
-                    navController.navigate("home") {
+                    // Skip login entirely if user already has an active Firebase session
+                    val destination = if (AuthRepository.isLoggedIn) "map" else "home"
+                    navController.navigate(destination) {
                         popUpTo("splash") { inclusive = true }
                     }
                 }
