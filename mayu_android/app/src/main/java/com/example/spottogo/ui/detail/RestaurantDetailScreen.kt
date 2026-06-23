@@ -1,7 +1,5 @@
 package com.example.spottogo.ui.detail
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,7 +29,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,9 +36,12 @@ import com.example.spottogo.data.Restaurant
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RestaurantDetailScreen(restaurant: Restaurant, onBack: () -> Unit) {
-    val context = LocalContext.current
-
+fun RestaurantDetailScreen(
+    restaurant: Restaurant,
+    onBack: () -> Unit,
+    onWatchVideo: () -> Unit = {},
+    onGetDirections: () -> Unit = {}
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -120,10 +120,7 @@ fun RestaurantDetailScreen(restaurant: Restaurant, onBack: () -> Unit) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Button(
-                onClick = {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(restaurant.videoUrl))
-                    context.startActivity(intent)
-                },
+                onClick = onWatchVideo,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp)
             ) {
@@ -135,12 +132,7 @@ fun RestaurantDetailScreen(restaurant: Restaurant, onBack: () -> Unit) {
             }
 
             OutlinedButton(
-                onClick = {
-                    val uri = Uri.parse(
-                        "https://maps.google.com/maps?daddr=${restaurant.latLng.latitude},${restaurant.latLng.longitude}"
-                    )
-                    context.startActivity(Intent(Intent.ACTION_VIEW, uri))
-                },
+                onClick = onGetDirections,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp)
             ) {
