@@ -152,6 +152,7 @@ for sh in s.shapes:
             "Contact Us Page — validated form, Snackbar success confirmation",
             "Privacy Policy — scrollable 5-section document",
             "Deep Orange theme (#FF5722) + gradient launcher icon  →  GitHub commit c87e960",
+            "Firebase Auth SDK wired: AuthRepository, real login/register, auth gate, loading spinner  →  commit 1b9c28c",
         ]
         for i, text in enumerate(done):
             para(tf, f'✓  {text}', 0, False, 12, first_para=(i == 0))
@@ -159,11 +160,12 @@ for sh in s.shapes:
 notes(s,
     "All goals from the last meeting were completed. "
     "The tick list covers every screen from the paper prototype. "
-    "Point out the last item — the orange theme and icon are now on the real device, "
-    "and everything is pushed to GitHub. "
-    "The nav graph flows: Splash → Home → Login / Register → Map → Detail → Video → TikTok "
-    "and Map → Detail → Directions. Contact Us and Privacy Policy are reachable from the "
-    "Home bottom navigation bar.")
+    "The second-to-last item is the orange theme and icon, now on the real device. "
+    "The last item is new this session: the Firebase Authentication code is fully written. "
+    "AuthRepository wraps FirebaseAuth, LoginScreen and RegisterScreen call real Firebase methods, "
+    "and the splash screen routes directly to the map if a session is already active. "
+    "The one remaining step before auth is live is placing google-services.json in the app module "
+    "and enabling Email/Password in the Firebase Console — that is the immediate next task.")
 
 # ── SLIDE 4 — All 11 Screenshots ──────────────────────────────────────────────
 s = prs.slides[3]
@@ -221,7 +223,7 @@ for sh in s.shapes:
         tf = sh.text_frame
         clear(sh)
         rows = [
-            ("The app already has 6 live backend-like systems — no server needed yet:", 0, True, 13),
+            ("The app has 7 backend systems — 6 live today, 1 ready to activate:", 0, True, 13),
             ("1. GPS  (FusedLocationProviderClient)", 1, True,  12),
             ("Real device coordinates centre the map and position all seed restaurants around the user.", 2, False, 10),
             ("2. Google Maps SDK  —  live map tiles, markers, camera animation", 1, True,  12),
@@ -234,6 +236,8 @@ for sh in s.shapes:
             ("Opens YouTube for videos, TikTok for restaurant search, Google Maps for turn-by-turn navigation.", 2, False, 10),
             ("6. Compose State  (remember / mutableStateOf)", 1, True,  12),
             ("Search queries update markers in real-time. Selected restaurant survives Map → Detail → Video.", 2, False, 10),
+            ("7. Firebase AuthRepository  —  code complete, pending google-services.json activation", 1, True,  12),
+            ("register() / login() / logout() / isLoggedIn wired to Firebase. Activates once google-services.json is added.", 2, False, 10),
         ]
         for i, (text, lvl, bold, pt) in enumerate(rows):
             para(tf, text, lvl, bold, pt, first_para=(i == 0))
@@ -272,10 +276,10 @@ for sh in s.shapes:
             ("Milestones", 0, True,  14),
             ("Dissertation Proposal draft — submit to supervisor by 30 June 2026", 1, False, 12),
             ("Progress Report — continue weekly reporting cycle", 1, False, 12),
-            ("Backend Phase — Firebase Auth + Places API target: 07 July 2026", 1, False, 12),
+            ("Backend Phase — Firebase Auth live + Places API target: 07 July 2026", 1, False, 12),
             ("", 0, False, 10),
-            ("Tasks for Next Week", 0, True,  14),
-            ("Task 1  —  Firebase Authentication (Registration & Login backend)", 1, False, 12),
+            ("Tasks for Next Session", 0, True,  14),
+            ("Task 1  —  Activate Firebase Auth (immediate — google-services.json + first build)", 1, False, 12),
             ("Task 2  —  Google Places Nearby Search API (real restaurant data)", 1, False, 12),
             ("Task 3  —  Live Search connected to Places API keyword parameter", 1, False, 12),
         ]
@@ -283,15 +287,19 @@ for sh in s.shapes:
             para(tf, text, lvl, bold, pt, first_para=(i == 0))
 
 notes(s,
-    "Three milestones are active this coming week. "
-    "The dissertation proposal draft is due to the supervisor by 30 June. "
-    "Weekly progress reporting continues. "
-    "The backend implementation phase is targeted for completion by 07 July. "
+    "Three milestones are active. "
+    "The dissertation proposal draft is due by 30 June. "
+    "Weekly reporting continues. "
+    "The backend phase target is 07 July. "
     "\n"
-    "The three development tasks are: Firebase Authentication, "
-    "Google Places Nearby Search API integration, and live search. "
-    "These three together will move the app from a UI prototype with seed data "
-    "to a fully functional, data-driven application.")
+    "Task 1 is the immediate next action: the Firebase Auth code is already written and committed. "
+    "All that remains is creating the Firebase project in the console, downloading google-services.json, "
+    "placing it in the app module, enabling Email/Password sign-in, and running the first build. "
+    "Once that build succeeds, real registration and login will be live. "
+    "\n"
+    "Tasks 2 and 3 follow after auth is confirmed working: "
+    "Places API replaces the seed data with live nearby restaurants, "
+    "and the live search bar sends the typed keyword to the API with a debounce.")
 
 # ── SLIDE 7 — Actions for Next Week (Detail) ─────────────────────────────────
 s = prs.slides[6]
@@ -302,11 +310,16 @@ for sh in s.shapes:
         tf = sh.text_frame
         clear(sh)
         rows = [
-            ("Task 1 — Firebase Authentication", 0, True,  13),
-            ("Add google-services.json + Firebase Auth dependency to build.gradle", 1, False, 11),
-            ("Register: call createUserWithEmailAndPassword() on CREATE ACCOUNT tap", 1, False, 11),
-            ("Login: call signInWithEmailAndPassword(), show inline errors on failure", 1, False, 11),
-            ("Gate MapScreen — unauthenticated users redirected back to LoginScreen", 1, False, 11),
+            ("Task 1 — Activate Firebase Auth  (IMMEDIATE NEXT STEP)", 0, True,  13),
+            ("✓  Firebase Auth SDK + google-services plugin added to build.gradle", 1, False, 11),
+            ("✓  AuthRepository: register() / login() / logout() / isLoggedIn singleton", 1, False, 11),
+            ("✓  LoginScreen: real signInWithEmailAndPassword, spinner, friendly errors", 1, False, 11),
+            ("✓  RegisterScreen: createUserWithEmailAndPassword + displayName update", 1, False, 11),
+            ("✓  MainActivity auth gate: splash routes to map if session active", 1, False, 11),
+            ("→  TODO: create Firebase project at console.firebase.google.com", 1, False, 11),
+            ("→  TODO: register app (com.example.spottogo), download google-services.json → app/", 1, False, 11),
+            ("→  TODO: enable Email/Password in Firebase Console → Authentication → Sign-in method", 1, False, 11),
+            ("→  TODO: run ./gradlew assembleDebug — verify build succeeds", 1, False, 11),
             ("Task 2 — Google Places Nearby Search API", 0, True,  13),
             ("Add Places SDK to libs.versions.toml and app/build.gradle.kts", 1, False, 11),
             ("Create PlacesRepository calling Nearby Search (type: restaurant, radius: 1500 m)", 1, False, 11),
@@ -320,26 +333,22 @@ for sh in s.shapes:
             para(tf, text, lvl, bold, pt, first_para=(i == 0))
 
 notes(s,
-    "Here is the step-by-step breakdown for next week. "
-    "\n"
-    "Task 1 — Firebase Auth: "
-    "We add google-services.json to the app module and the Firebase Auth dependency. "
-    "The Register screen calls createUserWithEmailAndPassword. "
-    "The Login screen calls signInWithEmailAndPassword. "
-    "Both show error messages if credentials are wrong or if there is a network issue. "
-    "An auth state listener will gate the Map screen — if not logged in, "
-    "the user is sent back to Login. "
+    "Task 1 is split into done and pending. "
+    "The code is fully written and pushed to GitHub: "
+    "AuthRepository, LoginScreen with real Firebase signIn, RegisterScreen with createUser, "
+    "and the MainActivity auth gate. "
+    "The four TODO items are all Firebase Console and file-placement steps — no more coding needed. "
+    "Once google-services.json is in the app folder and the build succeeds, "
+    "real user accounts will be created and stored in Firebase immediately. "
     "\n"
     "Task 2 — Places API: "
-    "We add the Places SDK dependency, create a new PlacesRepository class "
-    "that hits the Nearby Search endpoint with the user's GPS coordinates, "
-    "filtering for restaurants within 1500 metres. "
-    "This replaces the current five hardcoded seed restaurants. "
+    "After auth is confirmed working, we add the Places SDK, "
+    "create PlacesRepository hitting Nearby Search within 1500 metres, "
+    "and replace the five hardcoded seed restaurants with live data. "
     "\n"
     "Task 3 — Live Search: "
-    "The search bar text will be sent as the keyword parameter in the Places call. "
-    "We will add a 400ms debounce so the API is not called on every keystroke. "
-    "A CircularProgressIndicator will appear while the request is loading.")
+    "The search bar text becomes the keyword parameter in the Places call, "
+    "with a 400ms debounce and a loading indicator while the request is in flight.")
 
 # ── Save ──────────────────────────────────────────────────────────────────────
 prs.save(OUTPUT)
