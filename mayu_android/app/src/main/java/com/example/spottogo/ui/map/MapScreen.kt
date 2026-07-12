@@ -8,11 +8,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.SupportAgent
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,7 +51,13 @@ import com.google.maps.android.compose.rememberCameraPositionState
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun MapScreen(onRestaurantClick: (Restaurant) -> Unit) {
+fun MapScreen(
+    onRestaurantClick: (Restaurant) -> Unit,
+    onNavigateToHome: () -> Unit,
+    onNavigateToContact: () -> Unit,
+    onNavigateToPrivacy: () -> Unit,
+    onLogout: () -> Unit
+) {
     val context = LocalContext.current
     val locationPermission = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
 
@@ -94,41 +108,82 @@ fun MapScreen(onRestaurantClick: (Restaurant) -> Unit) {
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        GoogleMap(
-            modifier = Modifier.fillMaxSize(),
-            cameraPositionState = cameraPositionState,
-            properties = MapProperties(isMyLocationEnabled = locationPermission.status.isGranted),
-            uiSettings = MapUiSettings(myLocationButtonEnabled = true)
-        ) {
-            filteredRestaurants.forEach { restaurant ->
-                Marker(
-                    state = MarkerState(position = restaurant.latLng),
-                    title = restaurant.name,
-                    snippet = "${restaurant.cuisine} • ★${restaurant.rating}",
-                    onClick = {
-                        onRestaurantClick(restaurant)
-                        true
-                    }
+    Scaffold(
+        bottomBar = {
+            NavigationBar {
+                NavigationBarItem(
+                    icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
+                    label = { Text("Home") },
+                    selected = false,
+                    onClick = onNavigateToHome
+                )
+                NavigationBarItem(
+                    icon = { Icon(Icons.Default.Map, contentDescription = "Map") },
+                    label = { Text("Map") },
+                    selected = true,
+                    onClick = {}
+                )
+                NavigationBarItem(
+                    icon = { Icon(Icons.Default.SupportAgent, contentDescription = "Contact") },
+                    label = { Text("Contact") },
+                    selected = false,
+                    onClick = onNavigateToContact
+                )
+                NavigationBarItem(
+                    icon = { Icon(Icons.Default.Policy, contentDescription = "Privacy") },
+                    label = { Text("Privacy") },
+                    selected = false,
+                    onClick = onNavigateToPrivacy
+                )
+                NavigationBarItem(
+                    icon = { Icon(Icons.Default.ExitToApp, contentDescription = "Logout") },
+                    label = { Text("Logout") },
+                    selected = false,
+                    onClick = onLogout
                 )
             }
         }
-
-        OutlinedTextField(
-            value = searchQuery,
-            onValueChange = { searchQuery = it },
-            placeholder = { Text("Search restaurants...") },
-            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-            shape = RoundedCornerShape(28.dp),
+    ) { padding ->
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 48.dp)
-                .align(Alignment.TopCenter),
-            colors = OutlinedTextFieldDefaults.colors(
-                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                focusedContainerColor = MaterialTheme.colorScheme.surface
-            ),
-            singleLine = true
-        )
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            GoogleMap(
+                modifier = Modifier.fillMaxSize(),
+                cameraPositionState = cameraPositionState,
+                properties = MapProperties(isMyLocationEnabled = locationPermission.status.isGranted),
+                uiSettings = MapUiSettings(myLocationButtonEnabled = true)
+            ) {
+                filteredRestaurants.forEach { restaurant ->
+                    Marker(
+                        state = MarkerState(position = restaurant.latLng),
+                        title = restaurant.name,
+                        snippet = "${restaurant.cuisine} • ★${restaurant.rating}",
+                        onClick = {
+                            onRestaurantClick(restaurant)
+                            true
+                        }
+                    )
+                }
+            }
+
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                placeholder = { Text("Search restaurants...") },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                shape = RoundedCornerShape(28.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 48.dp)
+                    .align(Alignment.TopCenter),
+                colors = OutlinedTextFieldDefaults.colors(
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface
+                ),
+                singleLine = true
+            )
+        }
     }
 }

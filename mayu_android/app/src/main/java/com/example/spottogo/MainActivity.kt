@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,6 +44,12 @@ class MainActivity : ComponentActivity() {
 fun AppNavigation() {
     val navController = rememberNavController()
     var selectedRestaurant by remember { mutableStateOf<Restaurant?>(null) }
+    val logout: () -> Unit = {
+        AuthRepository.logout()
+        navController.navigate("login") {
+            popUpTo("splash") { inclusive = true }
+        }
+    }
 
     NavHost(navController = navController, startDestination = "splash") {
 
@@ -64,7 +71,8 @@ fun AppNavigation() {
                 onNavigateToLogin = { navController.navigate("login") },
                 onNavigateToMap = { navController.navigate("map") },
                 onNavigateToContact = { navController.navigate("contact") },
-                onNavigateToPrivacy = { navController.navigate("privacy") }
+                onNavigateToPrivacy = { navController.navigate("privacy") },
+                onLogout = logout
             )
         }
 
@@ -91,10 +99,26 @@ fun AppNavigation() {
         }
 
         composable("map") {
-            MapScreen(onRestaurantClick = { restaurant ->
-                selectedRestaurant = restaurant
-                navController.navigate("detail")
-            })
+            // Home's "Explore Nearby" can route here directly, so the gate lives
+            // on the destination itself rather than every caller.
+            if (AuthRepository.isLoggedIn) {
+                MapScreen(
+                    onRestaurantClick = { restaurant ->
+                        selectedRestaurant = restaurant
+                        navController.navigate("detail")
+                    },
+                    onNavigateToHome = { navController.navigate("home") },
+                    onNavigateToContact = { navController.navigate("contact") },
+                    onNavigateToPrivacy = { navController.navigate("privacy") },
+                    onLogout = logout
+                )
+            } else {
+                LaunchedEffect(Unit) {
+                    navController.navigate("login") {
+                        popUpTo("map") { inclusive = true }
+                    }
+                }
+            }
         }
 
         composable("detail") {

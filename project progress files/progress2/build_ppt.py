@@ -87,17 +87,18 @@ s = prs.slides[0]
 for sh in s.shapes:
     if sh.name == 'Rectangle 2':
         linebreak_rect(sh, 'Spot To Go  —  Android App',
-                           'Progress Report  |  23 June 2026')
+                           'Progress Report  |  12 July 2026')
     if sh.name == 'Rectangle 3':
         linebreak_rect(sh, 'Nagenthiran Nagarajah',
-                           'University of East Anglia  |  23-Jun-2026')
+                           'University of East Anglia  |  12-Jul-2026')
 
 notes(s,
     "Welcome. My name is Nagenthiran and this is my weekly progress report for "
     "Spot To Go — an Android app that lets users discover nearby restaurants on "
     "a Google Map, view details, and watch YouTube or TikTok preview videos. "
-    "This week I completed the full UI: all 11 screens from our hand-drawn "
-    "paper prototype are now implemented and connected with a live navigation graph.")
+    "Since the last report, Firebase Authentication has gone from written-but-inactive "
+    "code to a fully working, tested login and registration flow, and the map screen "
+    "gained proper navigation so users are never stuck.")
 
 # ── SLIDE 2 — Plan of Last Meeting ────────────────────────────────────────────
 s = prs.slides[1]
@@ -153,19 +154,29 @@ for sh in s.shapes:
             "Privacy Policy — scrollable 5-section document",
             "Deep Orange theme (#FF5722) + gradient launcher icon  →  GitHub commit c87e960",
             "Firebase Auth SDK wired: AuthRepository, real login/register, auth gate, loading spinner  →  commit 1b9c28c",
+            "Firebase project connected — google-services.json added, Maps SDK key configured, first successful build",
+            "Login mandatory before the map — MapScreen redirects to Login unless a Firebase session is active",
+            "Register/Login UX fixes — password show/hide toggle, keyboard no longer hides Password/Confirm fields",
+            "Map screen navigation fixed — added bottom nav bar (Home / Map / Contact / Privacy / Logout)",
+            "Login state now consistent across screens — Home's nav bar reflects real signed-in/out status",
         ]
         for i, text in enumerate(done):
             para(tf, f'✓  {text}', 0, False, 12, first_para=(i == 0))
 
 notes(s,
-    "All goals from the last meeting were completed. "
-    "The tick list covers every screen from the paper prototype. "
-    "The second-to-last item is the orange theme and icon, now on the real device. "
-    "The last item is new this session: the Firebase Authentication code is fully written. "
-    "AuthRepository wraps FirebaseAuth, LoginScreen and RegisterScreen call real Firebase methods, "
-    "and the splash screen routes directly to the map if a session is already active. "
-    "The one remaining step before auth is live is placing google-services.json in the app module "
-    "and enabling Email/Password in the Firebase Console — that is the immediate next task.")
+    "All goals from the last meeting were completed, and the Firebase Authentication work "
+    "went further than planned. "
+    "The tick list covers every screen from the paper prototype, the orange theme and icon, "
+    "and now a fully activated auth backend. "
+    "Once google-services.json was added and the Maps API key configured, the first real "
+    "build succeeded end-to-end. "
+    "Testing on a physical device surfaced three UX bugs that were fixed this session: "
+    "the keyboard was hiding the password fields (fixed with imePadding), there was no way "
+    "to verify a typed password before submitting (added a show/hide toggle), and the map "
+    "screen was a dead end with no way back to other screens except the phone's back button, "
+    "which just exited the app (fixed by adding a bottom navigation bar consistent with Home). "
+    "Login is now mandatory before reaching the map, and the two nav bars agree on whether "
+    "the user is actually signed in.")
 
 # ── SLIDE 4 — All 11 Screenshots ──────────────────────────────────────────────
 s = prs.slides[3]
@@ -236,15 +247,16 @@ for sh in s.shapes:
             ("Opens YouTube for videos, TikTok for restaurant search, Google Maps for turn-by-turn navigation.", 2, False, 10),
             ("6. Compose State  (remember / mutableStateOf)", 1, True,  12),
             ("Search queries update markers in real-time. Selected restaurant survives Map → Detail → Video.", 2, False, 10),
-            ("7. Firebase AuthRepository  —  code complete, pending google-services.json activation", 1, True,  12),
-            ("register() / login() / logout() / isLoggedIn wired to Firebase. Activates once google-services.json is added.", 2, False, 10),
+            ("7. Firebase AuthRepository  —  live and tested on a physical device", 1, True,  12),
+            ("register() / login() / logout() / isLoggedIn wired to Firebase and confirmed working end-to-end. Map is gated behind login.", 2, False, 10),
         ]
         for i, (text, lvl, bold, pt) in enumerate(rows):
             para(tf, text, lvl, bold, pt, first_para=(i == 0))
 
 notes(s,
-    "This slide addresses a common question: we haven't connected Firebase yet — "
-    "so is there any real backend? The answer is yes, six systems are already live. "
+    "This slide addresses a common question: is there a real backend behind this app? "
+    "The answer is yes, all seven systems are now live, including Firebase Authentication "
+    "which was activated and tested this week. "
     "\n"
     "GPS: the FusedLocationProviderClient returns the device's real coordinates. "
     "The map truly centres on where you are. "
@@ -274,32 +286,34 @@ for sh in s.shapes:
         clear(sh)
         rows = [
             ("Milestones", 0, True,  14),
-            ("Dissertation Proposal draft — submit to supervisor by 30 June 2026", 1, False, 12),
+            ("Dissertation Proposal draft — submitted to supervisor", 1, False, 12),
             ("Progress Report — continue weekly reporting cycle", 1, False, 12),
-            ("Backend Phase — Firebase Auth live + Places API target: 07 July 2026", 1, False, 12),
+            ("Backend Phase — Firebase Auth live; Places API now the active target", 1, False, 12),
             ("", 0, False, 10),
             ("Tasks for Next Session", 0, True,  14),
-            ("Task 1  —  Activate Firebase Auth (immediate — google-services.json + first build)", 1, False, 12),
-            ("Task 2  —  Google Places Nearby Search API (real restaurant data)", 1, False, 12),
-            ("Task 3  —  Live Search connected to Places API keyword parameter", 1, False, 12),
+            ("Task 1  —  Google Places Nearby Search API (real restaurant data)", 1, False, 12),
+            ("Task 2  —  Live Search connected to Places API keyword parameter", 1, False, 12),
+            ("Task 3  —  Double-back-to-exit confirmation on the map screen (UX polish)", 1, False, 12),
         ]
         for i, (text, lvl, bold, pt) in enumerate(rows):
             para(tf, text, lvl, bold, pt, first_para=(i == 0))
 
 notes(s,
     "Three milestones are active. "
-    "The dissertation proposal draft is due by 30 June. "
+    "The dissertation proposal draft has been submitted. "
     "Weekly reporting continues. "
-    "The backend phase target is 07 July. "
+    "The backend phase has moved on from auth — that is now live — to the Places API. "
     "\n"
-    "Task 1 is the immediate next action: the Firebase Auth code is already written and committed. "
-    "All that remains is creating the Firebase project in the console, downloading google-services.json, "
-    "placing it in the app module, enabling Email/Password sign-in, and running the first build. "
-    "Once that build succeeds, real registration and login will be live. "
+    "Task 1 is now the immediate next action: Firebase Auth activation is complete and tested, "
+    "so the next backend milestone is replacing the five hardcoded seed restaurants with a real "
+    "Google Places Nearby Search call. "
     "\n"
-    "Tasks 2 and 3 follow after auth is confirmed working: "
-    "Places API replaces the seed data with live nearby restaurants, "
-    "and the live search bar sends the typed keyword to the API with a debounce.")
+    "Task 2 follows once Places API data is flowing: the live search bar sends the typed keyword "
+    "to the API with a debounce instead of filtering the seed list client-side. "
+    "\n"
+    "Task 3 is a small UX polish item raised during device testing: pressing back on the map "
+    "currently exits the app immediately since it is the root screen after login — a "
+    "press-back-again-to-exit confirmation would be friendlier than an instant close.")
 
 # ── SLIDE 7 — Actions for Next Week (Detail) ─────────────────────────────────
 s = prs.slides[6]
@@ -310,45 +324,50 @@ for sh in s.shapes:
         tf = sh.text_frame
         clear(sh)
         rows = [
-            ("Task 1 — Activate Firebase Auth  (IMMEDIATE NEXT STEP)", 0, True,  13),
-            ("✓  Firebase Auth SDK + google-services plugin added to build.gradle", 1, False, 11),
-            ("✓  AuthRepository: register() / login() / logout() / isLoggedIn singleton", 1, False, 11),
-            ("✓  LoginScreen: real signInWithEmailAndPassword, spinner, friendly errors", 1, False, 11),
-            ("✓  RegisterScreen: createUserWithEmailAndPassword + displayName update", 1, False, 11),
-            ("✓  MainActivity auth gate: splash routes to map if session active", 1, False, 11),
-            ("→  TODO: create Firebase project at console.firebase.google.com", 1, False, 11),
-            ("→  TODO: register app (com.example.spottogo), download google-services.json → app/", 1, False, 11),
-            ("→  TODO: enable Email/Password in Firebase Console → Authentication → Sign-in method", 1, False, 11),
-            ("→  TODO: run ./gradlew assembleDebug — verify build succeeds", 1, False, 11),
-            ("Task 2 — Google Places Nearby Search API", 0, True,  13),
+            ("Firebase Auth — COMPLETE  (activated and tested this session)", 0, True,  13),
+            ("✓  google-services.json added to app/ and Maps SDK API key configured", 1, False, 11),
+            ("✓  Email/Password sign-in enabled in Firebase Console", 1, False, 11),
+            ("✓  First successful build — ./gradlew assembleDebug — confirmed on device", 1, False, 11),
+            ("✓  Register → auto-login → Map flow tested end-to-end on a physical phone", 1, False, 11),
+            ("✓  Fixed: keyboard hid Password/Confirm fields — added imePadding on Login/Register", 1, False, 11),
+            ("✓  Fixed: no way to verify typed password — added show/hide toggle", 1, False, 11),
+            ("✓  Fixed: map screen had no way back — added bottom nav (Home/Map/Contact/Privacy/Logout)", 1, False, 11),
+            ("✓  Fixed: Home nav bar showed 'Login' even when signed in — now reflects real auth state", 1, False, 11),
+            ("Task 1 — Google Places Nearby Search API  (IMMEDIATE NEXT STEP)", 0, True,  13),
             ("Add Places SDK to libs.versions.toml and app/build.gradle.kts", 1, False, 11),
             ("Create PlacesRepository calling Nearby Search (type: restaurant, radius: 1500 m)", 1, False, 11),
             ("Replace RestaurantRepository seed data with live API results on MapScreen", 1, False, 11),
-            ("Task 3 — Live Search Functionality", 0, True,  13),
+            ("Task 2 — Live Search Functionality", 0, True,  13),
             ("Pass MapScreen search bar text as keyword param in Places API call", 1, False, 11),
             ("Refresh markers in real-time as the user types (debounce 400 ms)", 1, False, 11),
             ("Show CircularProgressIndicator while API request is in progress", 1, False, 11),
+            ("Task 3 — Map Back-Press UX Polish", 0, True,  13),
+            ("Add press-back-again-to-exit confirmation on the map screen", 1, False, 11),
         ]
         for i, (text, lvl, bold, pt) in enumerate(rows):
             para(tf, text, lvl, bold, pt, first_para=(i == 0))
 
 notes(s,
-    "Task 1 is split into done and pending. "
-    "The code is fully written and pushed to GitHub: "
-    "AuthRepository, LoginScreen with real Firebase signIn, RegisterScreen with createUser, "
-    "and the MainActivity auth gate. "
-    "The four TODO items are all Firebase Console and file-placement steps — no more coding needed. "
-    "Once google-services.json is in the app folder and the build succeeds, "
-    "real user accounts will be created and stored in Firebase immediately. "
+    "Firebase Authentication is now fully complete, not just code-written. "
+    "google-services.json was added, the Maps API key was configured, and Email/Password "
+    "sign-in was enabled in the Firebase Console. The first build succeeded, and the full "
+    "register-to-map flow was tested on a physical device rather than just an emulator. "
+    "That real-device testing is what surfaced four UX bugs, all now fixed: the keyboard "
+    "hiding the password fields, no way to double-check a typed password, the map screen "
+    "being a dead end, and the Home nav bar not reflecting the real sign-in state. "
     "\n"
-    "Task 2 — Places API: "
-    "After auth is confirmed working, we add the Places SDK, "
+    "Task 1 — Places API: "
+    "Now that auth is confirmed working, we add the Places SDK, "
     "create PlacesRepository hitting Nearby Search within 1500 metres, "
     "and replace the five hardcoded seed restaurants with live data. "
     "\n"
-    "Task 3 — Live Search: "
+    "Task 2 — Live Search: "
     "The search bar text becomes the keyword parameter in the Places call, "
-    "with a 400ms debounce and a loading indicator while the request is in flight.")
+    "with a 400ms debounce and a loading indicator while the request is in flight. "
+    "\n"
+    "Task 3 — Back-press polish: "
+    "A small but user-visible fix identified during testing — pressing back on the map "
+    "currently exits the app immediately since it has no parent screen in the back stack.")
 
 # ── Save ──────────────────────────────────────────────────────────────────────
 prs.save(OUTPUT)

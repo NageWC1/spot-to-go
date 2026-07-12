@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Map
@@ -38,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.spottogo.data.AuthRepository
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,9 +48,11 @@ fun HomeScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToMap: () -> Unit,
     onNavigateToContact: () -> Unit = {},
-    onNavigateToPrivacy: () -> Unit = {}
+    onNavigateToPrivacy: () -> Unit = {},
+    onLogout: () -> Unit = {}
 ) {
     var searchQuery by remember { mutableStateOf("") }
+    val isLoggedIn = AuthRepository.isLoggedIn
 
     Scaffold(
         topBar = {
@@ -93,10 +97,15 @@ fun HomeScreen(
                     onClick = onNavigateToPrivacy
                 )
                 NavigationBarItem(
-                    icon = { Icon(Icons.Default.Person, contentDescription = "Login") },
-                    label = { Text("Login") },
+                    icon = {
+                        Icon(
+                            if (isLoggedIn) Icons.Default.ExitToApp else Icons.Default.Person,
+                            contentDescription = if (isLoggedIn) "Logout" else "Login"
+                        )
+                    },
+                    label = { Text(if (isLoggedIn) "Logout" else "Login") },
                     selected = false,
-                    onClick = onNavigateToLogin
+                    onClick = if (isLoggedIn) onLogout else onNavigateToLogin
                 )
             }
         }
