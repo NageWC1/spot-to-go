@@ -290,6 +290,11 @@ for sh in s.shapes:
             ("Progress Report — continue weekly reporting cycle", 1, False, 12),
             ("Backend Phase — Firebase Auth live; Places API now the active target", 1, False, 12),
             ("", 0, False, 10),
+            ("Starting Point for Next Session", 0, True,  14),
+            ("data/Restaurant.kt → RestaurantRepository.getSeedRestaurants() is where work begins:", 1, False, 12),
+            ("replace its hardcoded list with a new PlacesRepository backed by a live Nearby Search call", 2, False, 11),
+            ("MapScreen.kt already consumes RestaurantRepository, so the UI needs no rework — only the data source changes", 2, False, 11),
+            ("", 0, False, 10),
             ("Tasks for Next Session", 0, True,  14),
             ("Task 1  —  Google Places Nearby Search API (real restaurant data)", 1, False, 12),
             ("Task 2  —  Live Search connected to Places API keyword parameter", 1, False, 12),
@@ -303,6 +308,13 @@ notes(s,
     "The dissertation proposal draft has been submitted. "
     "Weekly reporting continues. "
     "The backend phase has moved on from auth — that is now live — to the Places API. "
+    "\n"
+    "To be concrete about where next session starts: data/Restaurant.kt currently defines "
+    "RestaurantRepository.getSeedRestaurants(), which returns five hardcoded restaurants "
+    "offset from the user's GPS position. That function is the exact starting point — it "
+    "gets replaced by a new PlacesRepository that calls the real Places Nearby Search API. "
+    "Because MapScreen.kt already reads from RestaurantRepository rather than holding data "
+    "itself, no UI changes are needed; only the data source underneath it changes. "
     "\n"
     "Task 1 is now the immediate next action: Firebase Auth activation is complete and tested, "
     "so the next backend milestone is replacing the five hardcoded seed restaurants with a real "
