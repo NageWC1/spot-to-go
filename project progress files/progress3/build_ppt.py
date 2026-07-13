@@ -23,17 +23,26 @@ OUTPUT = os.path.join(BASE, 'Spot_To_Go_Presentation.pptx')
 
 prs = Presentation(TMPL)
 
-# ── Delete duplicate example slides 8-13 (keep only slides 1-7) ──────────────
+# ── Delete duplicate example slides ───────────────────────────────────────────
+# The template repeats its title-slide layout at index 7 (an extra copy of
+# slide 0) before its content slides continue at index 8+. Drop that repeated
+# title slide first, then trim from the end so 8 slides remain: 1 title +
+# 7 content slides (6 "done so far" + 1 "what's coming next").
 NS_R = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships'
 id_lst = prs.slides._sldIdLst
-for _ in range(len(prs.slides) - 7):          # remove from the end
-    elem = id_lst[-1]
+
+def drop_slide(index):
+    elem = id_lst[index]
     r_id = elem.get(f'{{{NS_R}}}id')
     id_lst.remove(elem)
     try:
         prs.slides.part._rels.pop(r_id, None)
     except Exception:
         pass
+
+drop_slide(7)
+for _ in range(len(prs.slides) - 8):          # remove remaining excess from the end
+    drop_slide(-1)
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 def clear(placeholder):
@@ -320,7 +329,38 @@ notes(s,
     "The map uses the user's real location to show nearby restaurants, and from "
     "there, users can preview a restaurant with a real video before deciding to "
     "go, then get directions with a single tap. "
-    "That's Spot To Go. Thank you.")
+    "That's Spot To Go so far.")
+
+# ── SLIDE 8 — What's Coming Next ──────────────────────────────────────────────
+s = prs.slides[7]
+for sh in s.shapes:
+    if sh.name == 'Title 1':
+        sh.text_frame.paragraphs[0].text = "What's Coming Next"
+    if sh.name == 'Content Placeholder 2':
+        tf = sh.text_frame
+        clear(sh)
+        rows = [
+            "Connect the map to real, live restaurant listings nearby",
+            "Make the search bar pull results directly from those live listings",
+            "Add a small safeguard so pressing back on the map doesn't close the app by accident",
+        ]
+        for i, text in enumerate(rows):
+            para(tf, text, 0, False, 14, first_para=(i == 0))
+strip_date(s)
+
+notes(s,
+    "So what comes next? "
+    "Right now, the restaurants you saw on the map are a small sample set used to "
+    "build and test every screen properly. "
+    "The next step is to connect the map to real, live restaurant listings near "
+    "the user, so the same experience you just saw works with genuine, up-to-date "
+    "places. "
+    "Once that's in place, the search bar will pull its results from those live "
+    "listings directly, instead of filtering the sample set. "
+    "Alongside that, there's one small polish item: pressing back on the map "
+    "currently closes the app straight away, and we'll add a simple safeguard so "
+    "that doesn't happen by accident. "
+    "That's the plan for the next stage of Spot To Go. Thank you.")
 
 # ── Save ──────────────────────────────────────────────────────────────────────
 prs.save(OUTPUT)
