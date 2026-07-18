@@ -247,12 +247,13 @@ Four implementation choices depart from the proposal, summarised here for transp
 
 Testing to date has been carried out informally on a physical Android device rather than through the structured, objective-by-objective test plan proposed earlier, and this remains an open task noted in Section 8. That said, the core flow — opening the app, registering an account, being signed in automatically, viewing the map, opening a restaurant's detail screen, watching its video, and requesting directions — has been exercised directly and works as intended.
 
-This testing surfaced four issues, all of which have since been fixed:
+This testing surfaced five issues, all of which have since been fixed:
 \begin{itemize}
     \item The on-screen keyboard was covering the password field on the Login and Registration screens; resolved by applying \texttt{imePadding} so the form scrolls clear of the keyboard.
     \item There was no way to check a password had been typed correctly before submitting; resolved by adding a show/hide toggle to both password fields.
     \item The Map screen had no way back to the rest of the app other than the phone's back button, which simply exited the app; resolved by adding a bottom navigation bar consistent with the Home screen.
     \item The Home screen's navigation bar showed a ``Login'' option even when a user was already signed in; resolved by having both navigation bars read the same \texttt{isLoggedIn} state.
+    \item The Login screen's ``Continue as Guest'' option bypassed Firebase Auth entirely and, once the Map screen was gated on a signed-in session, sent guest users into a redirect loop; the button was removed. The Login screenshot in Figure~\ref{fig:screens} was captured before this fix and still shows the button, which has since been removed from the app.
 \end{itemize}
 
 \subsection{Usability Considerations}
