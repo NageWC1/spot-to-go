@@ -20,9 +20,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.DirectionsBus
 import androidx.compose.material.icons.filled.DirectionsCar
-import androidx.compose.material.icons.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.Schedule
@@ -194,7 +194,7 @@ fun DirectionsScreen(restaurant: Restaurant, onBack: () -> Unit) {
                                     imageVector = when (mode) {
                                         TransportMode.CAR -> Icons.Default.DirectionsCar
                                         TransportMode.TRANSIT -> Icons.Default.DirectionsBus
-                                        TransportMode.WALK -> Icons.Default.DirectionsWalk
+                                        TransportMode.WALK -> Icons.AutoMirrored.Filled.DirectionsWalk
                                     },
                                     contentDescription = null,
                                     modifier = Modifier.size(16.dp)

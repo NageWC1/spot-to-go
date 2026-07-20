@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Map
@@ -99,7 +99,7 @@ fun HomeScreen(
                 NavigationBarItem(
                     icon = {
                         Icon(
-                            if (isLoggedIn) Icons.Default.ExitToApp else Icons.Default.Person,
+                            if (isLoggedIn) Icons.AutoMirrored.Filled.ExitToApp else Icons.Default.Person,
                             contentDescription = if (isLoggedIn) "Logout" else "Login"
                         )
                     },
