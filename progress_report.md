@@ -1,7 +1,7 @@
 # Project Progress Report
 ## Spot To Go — Android Dissertation Project
-**Date:** 4 June 2026
-**Current Phase:** Android Development — Phase 1–4 Complete, Gemini AI Search Next
+**Date:** 20 July 2026 (originally 4 June 2026, updated each session — see dated entries below)
+**Current Phase:** Android Development — core screens, navigation, and Firebase Auth complete; Places API + Gemini AI search remain
 
 ---
 
@@ -125,11 +125,11 @@
 | Phase 2 | Google Maps + GPS location | DONE |
 | Phase 3 | Restaurant markers (seeded data) | DONE |
 | Phase 4 | Restaurant detail + video + directions | DONE |
-| Phase 5 | **Gemini API — Agentic AI Search Bar** | **UP NEXT** |
-| Phase 6 | Live Places API integration | NOT STARTED |
-| Phase 7 | Firebase Auth (login/register) | NOT STARTED |
-| Phase 8 | UI polish, loading indicators, error handling | NOT STARTED |
-| Phase 9 | Final report writing | NOT STARTED |
+| Phase 5 | **Gemini API — Agentic AI Search Bar** | **UP NEXT** (currently plain keyword filter) |
+| Phase 6 | Live Places API integration | NOT STARTED (still hardcoded seed restaurants) |
+| Phase 7 | Firebase Auth (login/register) | DONE — tested on physical device, map gated behind login |
+| Phase 8 | UI polish, loading indicators, error handling | IN PROGRESS — 11 screens implemented incl. bottom nav, password visibility, loading spinners |
+| Phase 9 | Final report writing | IN PROGRESS — draft submitted for supervisor feedback |
 
 ---
 
@@ -213,6 +213,39 @@
   - Search bar bullet relabelled: *"Search bar — Agentic AI powered (Key Innovation)"*
   - Added 3 new bullet points: current state (keyword filter), planned Gemini API integration, and natural language examples
   - Speaker note fully rewritten to cover current keyword filter behaviour AND the Gemini AI upgrade plan with talking points for the presentation
+
+---
+
+## Session — 20 July 2026
+
+### Git Repository Sync
+- Local branch was one commit behind `origin/main`; three pending local changes (`.idea/vcs.xml`, presentation deck, `google-services.json`) were confirmed byte-identical to what the remote commit (`1ee4271` — screenshot swap fix + Firebase config) already contained
+- Stashed the duplicate local changes, fast-forwarded to `origin/main`, verified the stash held nothing new, then dropped it
+- Repository confirmed fully in sync with no risk of losing work
+
+### UI Implementation Audit
+- **Trigger:** concern that the "new" build screens and login logic were missing from the Android app, since running the app appeared to show an older version
+- Cross-checked all 11 screens under `ui/` against the latest design screenshots in `final report/images` (splash, login, register, home, map, restaurant detail, video, TikTok, directions, contact, privacy)
+- **Finding:** every screen was already implemented and matched its screenshot; the login gate (`AuthRepository.isLoggedIn` check in `MainActivity.kt`) was also confirmed wired correctly
+- **Actual root cause of the "old version" confusion (identified after further testing):** the developer's phone was in dark mode while the client's device is in light mode — `SpotToGoTheme` switches automatically via `isSystemInDarkTheme()`, so the two looked different but both were the current build. A stale installed APK on the emulator was a secondary contributor, resolved by a full `clean installDebug`.
+
+### Build Environment Fix
+- Terminal builds failed with `JAVA_HOME is not set`; resolved by pointing `JAVA_HOME` at Android Studio's bundled JDK (`C:\Program Files\Android\Android Studio\jbr`) rather than installing a separate JDK
+- Set permanently via user environment variable so future terminal builds work without reconfiguration
+- Confirmed `.\gradlew clean installDebug` succeeds and installs onto the `Medium_Phone` emulator
+
+### Deprecation Warning Cleanup
+- Fixed 3 `compileDebugKotlin` deprecation warnings by switching to `Icons.AutoMirrored.Filled` variants:
+  - `ExitToApp` in `ui/home/HomeScreen.kt` and `ui/map/MapScreen.kt`
+  - `DirectionsWalk` in `ui/directions/DirectionsScreen.kt`
+- Rebuilt to confirm a clean compiler output with no warnings
+- Committed and pushed (`4412088`)
+
+### Client Handoff Preparation
+- Built a standalone debug APK (`app/build/outputs/apk/debug/app-debug.apk`, ~20 MB) — the recommended way to share the app, since it removes every environment difference (SDK path, JDK version, gradle cache) between machines
+- Also prepared a clean copy of the source project (`SpotToGo_source_for_client.zip`) for cases where the client wants to open the project in their own Android Studio:
+  - Excluded `.gradle`, `build/`, `.kotlin`, `.cxx`, `captures`, `.externalNativeBuild`, and IDE cache/user-state files
+  - Kept `MAPS_API_KEY` in `local.properties` (required to build) but removed the hardcoded `sdk.dir` path, since Android Studio auto-fills this with the correct path on whichever machine opens the project
 
 ---
 
