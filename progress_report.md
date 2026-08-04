@@ -1,7 +1,7 @@
 # Project Progress Report
 ## Spot To Go — Android Dissertation Project
 **Date:** 4 August 2026 (originally 4 June 2026, updated each session — see dated entries below)
-**Current Phase:** Android Development — core screens, navigation, Firebase Auth, and Gemini AI search complete; Places API integration remains
+**Current Phase:** Android Development — core screens, navigation, Firebase Auth, and Gemini AI search complete; direction decided to move restaurant data (Places API), reviews, and video (YouTube Data API) to fully dynamic sourcing — paused pending resolution of Gemini API student access
 
 ---
 
@@ -126,7 +126,7 @@
 | Phase 3 | Restaurant markers (seeded data) | DONE |
 | Phase 4 | Restaurant detail + video + directions | DONE |
 | Phase 5 | Gemini API — Agentic AI Search Bar | DONE — natural language query → structured filters, tested on device |
-| Phase 6 | Live Places API integration | **UP NEXT** (still hardcoded seed restaurants) |
+| Phase 6 | Live Places API integration — now scoped as full dynamic pipeline (Gemini → Places search → real details/reviews → YouTube Data API video) | **PAUSED** — direction agreed and documented above, blocked on resolving Gemini API student access before implementation starts |
 | Phase 7 | Firebase Auth (login/register) | DONE — tested on physical device, map gated behind login |
 | Phase 8 | UI polish, loading indicators, error handling | IN PROGRESS — 11 screens implemented incl. bottom nav, password visibility, loading spinners |
 | Phase 9 | Final report writing | IN PROGRESS — draft submitted for supervisor feedback |
@@ -293,6 +293,26 @@
   - Sushi World (Japanese) → "A Day In The Life Of A Sushi Master" by Tasty
 - Added a `videoAuthor` field to `Restaurant` and updated `VideoScreen.kt` to display the real channel name, since the screen previously hardcoded "by Foodie Explorer" for every restaurant regardless of the actual video — that would have been actively misleading now that real videos play
 - **Verified on device:** rebuilt, reinstalled, tapped through The Spice Garden → Watch Video Preview → Watch on YouTube — the real YouTube app opened and began playing a pre-roll ad before the actual video, confirming the video is live (a broken/unavailable video would show an error instantly rather than loading an ad)
+
+### Direction Decided — Move to Fully Dynamic Restaurant Data (Planning Only, Not Yet Built)
+
+- **Decision:** the project's direction going forward is to replace the 5 hardcoded seed restaurants with real restaurant data fetched dynamically at search time, rather than continuing to expand the static demo dataset. Concretely:
+  - **Discovery:** Gemini parses the typed query into structured filters (cuisine, price, keyword/vibe terms), and those filters drive a real **Google Places Text/Nearby Search** call — this replaces `RestaurantRepository` as the source of restaurant results
+  - **Details:** location, address, rating, and price all come directly from the Places API response for whichever restaurant is tapped — no hardcoded data
+  - **Reviews:** Google **Place Details** returns up to 5 real user reviews per place — this would be new content the app doesn't currently show at all
+  - **Directions:** already works with any real lat/lng, so this needs no changes once restaurants are real
+  - **YouTube video:** can become genuinely dynamic via the **YouTube Data API** (`search.list`), searching `"<restaurant name> review"` and using a real top result, instead of a hand-picked hardcoded link
+- **Known constraints flagged during discussion (not yet resolved with the project owner):**
+  - **"Vibe" (quiet, romantic, etc.) has no structured field in the Places API.** The realistic option is folding vibe words into the Places text query itself and relying on Google's own fuzzy ranking — there's no guaranteed structured filter like the current hardcoded `vibeTags` gives us. Alternative is dropping vibe filtering entirely for real restaurants. **Not yet decided.**
+  - **TikTok cannot be sourced dynamically through any Google API.** TikTok isn't a Google product and its public API doesn't support open search by business name without a restricted business-partner agreement — there is no "get it through Google" path for TikTok. It would need to stay a manual/static link, or be dropped from the dynamic vision entirely. **Not yet decided.**
+- **Status: paused before implementation.** Work on this direction is on hold until the Gemini API access situation is resolved (see below) — no code has been changed for this yet, this section only records the agreed direction so the next session can pick up from here.
+
+### Paused — Waiting on Gemini API Student Access
+
+- The existing Gemini key is hitting `429 RESOURCE_EXHAUSTED` with `limit: 0` on the free-tier daily quota (see issue logged above) — this looks like a project/billing configuration problem rather than a temporary throttle
+- Project owner is a student and is pursuing student-tier API access, expecting it may resolve the quota problem
+- **Expectation set during discussion:** there is no literal "unlimited" Gemini API tier, including paid tiers — higher tiers raise rate limits significantly but don't remove them. A properly-provisioned project (student or otherwise) should show a real non-zero quota number rather than `limit: 0`; if the *same* key/project is reused, waiting alone likely won't fix it — the Cloud Console quotas page would need checking directly
+- All Gemini-related work (including the dynamic-search direction above) is paused until this is sorted out
 
 ---
 
