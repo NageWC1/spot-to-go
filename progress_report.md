@@ -281,6 +281,19 @@
 1. **Gemini API key hitting quota errors.** Testing the same query multiple times in a row eventually returned an empty result set instead of a filtered one. Direct `curl` testing of the key against the Gemini endpoint confirmed a `429 RESOURCE_EXHAUSTED` response with `limit: 0` on the free tier for this key's Google Cloud project. This is a project/billing configuration issue, not an app bug — the app's fallback-to-keyword-search behaviour worked exactly as designed when the AI call failed, it just isn't a satisfying demo when it happens. **Action needed:** either enable quota/billing on the existing key's project, or generate a fresh key from a project that has free-tier quota available.
 2. **Seed video URLs are placeholders.** "Watch Video Preview" correctly opens YouTube with the stored `videoUrl`, but the hardcoded video IDs in `RestaurantRepository` (e.g. `Oo6HXisGLoM` for The Spice Garden) are not real/available videos, so YouTube reports "This video is unavailable." The launch mechanism itself works correctly — this is a content/data issue only. **Action needed:** replace the 5 placeholder video IDs with real YouTube video links before the next demo.
 
+### Placeholder Video IDs Replaced With Real Videos
+
+- **Clarified scope first:** the 5 restaurants are fictional seed data (Places API integration is Phase 6, not yet built), so no real video of e.g. "The Spice Garden" specifically can exist — any video is necessarily a generic, cuisine-matched review. Confirmed with the project owner that the fix should stay within the existing hardcoded `place_id -> video URL` architecture (per the original CLAUDE.md Phase 4 plan) rather than building a dynamic YouTube-search feature, since the seed restaurants aren't real businesses regardless of how the video is sourced
+- Searched for real, cuisine-matched restaurant/food review videos and verified each candidate is live and embeddable via YouTube's oEmbed endpoint (`GET /oembed?url=...&format=json`) before using it — avoids repeating the same "unavailable" mistake with a different fabricated ID
+- Updated all 5 seed restaurants in `Restaurant.kt` with real, verified video IDs:
+  - The Spice Garden (Indian) → "I Review The World's Best Indian Restaurant" by Gary Eats
+  - Noodle House (Chinese) → "Chinese Street Food Tour in Guilin, China | ENTER NOODLE HEAVEN" by The Food Ranger
+  - Bella Italia (Italian) → "This Italian Restaurant Has the BEST Sauce! | Bella Italia Ristorante Review" by the altem life — a direct name match
+  - Burger Republic (American) → "I Review AMERICA'S BEST BURGER" by Gary Eats
+  - Sushi World (Japanese) → "A Day In The Life Of A Sushi Master" by Tasty
+- Added a `videoAuthor` field to `Restaurant` and updated `VideoScreen.kt` to display the real channel name, since the screen previously hardcoded "by Foodie Explorer" for every restaurant regardless of the actual video — that would have been actively misleading now that real videos play
+- **Verified on device:** rebuilt, reinstalled, tapped through The Spice Garden → Watch Video Preview → Watch on YouTube — the real YouTube app opened and began playing a pre-roll ad before the actual video, confirming the video is live (a broken/unavailable video would show an error instantly rather than loading an ad)
+
 ---
 
 ## Key Decisions Made (For Reference)

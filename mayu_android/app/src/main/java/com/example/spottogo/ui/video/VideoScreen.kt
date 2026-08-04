@@ -97,7 +97,7 @@ fun VideoScreen(
                     fontSize = 18.sp
                 )
                 Text(
-                    text = "by Foodie Explorer",
+                    text = "by ${restaurant.videoAuthor}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

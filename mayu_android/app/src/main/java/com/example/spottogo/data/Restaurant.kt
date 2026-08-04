@@ -10,6 +10,7 @@ data class Restaurant(
     val address: String,
     val latLng: LatLng,
     val videoUrl: String,
+    val videoAuthor: String,
     val distanceMeters: Int,
     val priceRange: String,
     val vibeTags: List<String>
@@ -26,7 +27,8 @@ object RestaurantRepository {
                 cuisine = "Indian",
                 address = "12 Harbour Street",
                 latLng = LatLng(userLat + 0.004, userLng + 0.002),
-                videoUrl = "https://www.youtube.com/watch?v=Oo6HXisGLoM",
+                videoUrl = "https://www.youtube.com/watch?v=bgzP3yn1kNE",
+                videoAuthor = "Gary Eats",
                 distanceMeters = 450,
                 priceRange = "mid-range",
                 vibeTags = listOf("cosy", "family-friendly", "spicy")
@@ -38,7 +40,8 @@ object RestaurantRepository {
                 cuisine = "Chinese",
                 address = "88 West Avenue",
                 latLng = LatLng(userLat - 0.003, userLng + 0.005),
-                videoUrl = "https://www.youtube.com/watch?v=ZJthWmU0cKk",
+                videoUrl = "https://www.youtube.com/watch?v=h_qrDLZv-yU",
+                videoAuthor = "The Food Ranger",
                 distanceMeters = 620,
                 priceRange = "budget",
                 vibeTags = listOf("casual", "quick-bite", "cheap")
@@ -50,7 +53,8 @@ object RestaurantRepository {
                 cuisine = "Italian",
                 address = "5 Crown Road",
                 latLng = LatLng(userLat + 0.002, userLng - 0.004),
-                videoUrl = "https://www.youtube.com/watch?v=lsNpOFcjLQg",
+                videoUrl = "https://www.youtube.com/watch?v=5LvDiBa5SuU",
+                videoAuthor = "the altem life",
                 distanceMeters = 310,
                 priceRange = "premium",
                 vibeTags = listOf("romantic", "quiet", "date-night")
@@ -62,7 +66,8 @@ object RestaurantRepository {
                 cuisine = "American",
                 address = "27 Market Lane",
                 latLng = LatLng(userLat - 0.005, userLng - 0.003),
-                videoUrl = "https://www.youtube.com/watch?v=RUV7IbcDzrk",
+                videoUrl = "https://www.youtube.com/watch?v=_Vuq_IGaMNw",
+                videoAuthor = "Gary Eats",
                 distanceMeters = 780,
                 priceRange = "budget",
                 vibeTags = listOf("casual", "family-friendly", "cheap")
@@ -74,7 +79,8 @@ object RestaurantRepository {
                 cuisine = "Japanese",
                 address = "31 Ocean Boulevard",
                 latLng = LatLng(userLat + 0.007, userLng + 0.001),
-                videoUrl = "https://www.youtube.com/watch?v=N1C6HBH4VrA",
+                videoUrl = "https://www.youtube.com/watch?v=3wAQxJeyyXo",
+                videoAuthor = "Tasty",
                 distanceMeters = 950,
                 priceRange = "premium",
                 vibeTags = listOf("quiet", "romantic", "date-night")
