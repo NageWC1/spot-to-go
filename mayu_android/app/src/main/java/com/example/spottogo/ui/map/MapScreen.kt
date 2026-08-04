@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
@@ -14,6 +15,7 @@ import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SupportAgent
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -33,8 +35,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import com.example.spottogo.data.GeminiSearchService
 import com.example.spottogo.data.Restaurant
 import com.example.spottogo.data.RestaurantRepository
+import com.example.spottogo.data.SearchIntent
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -48,6 +52,7 @@ import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -63,6 +68,8 @@ fun MapScreen(
 
     var restaurants by remember { mutableStateOf<List<Restaurant>>(emptyList()) }
     var searchQuery by remember { mutableStateOf("") }
+    var searchIntent by remember { mutableStateOf<SearchIntent?>(null) }
+    var isInterpretingSearch by remember { mutableStateOf(false) }
 
     val defaultLocation = LatLng(51.5074, -0.1278)
     val cameraPositionState = rememberCameraPositionState {
@@ -99,12 +106,38 @@ fun MapScreen(
         }
     }
 
+    // Debounce the query, then ask Gemini to turn it into structured filters (cuisine,
+    // price range, vibe). Resetting searchIntent to null up front means the plain keyword
+    // filter below is used as an instant fallback while the AI call is in flight or if it fails.
+    LaunchedEffect(searchQuery) {
+        if (searchQuery.isBlank()) {
+            searchIntent = null
+            isInterpretingSearch = false
+            return@LaunchedEffect
+        }
+        searchIntent = null
+        isInterpretingSearch = true
+        delay(600)
+        val result = GeminiSearchService.interpret(searchQuery)
+        isInterpretingSearch = false
+        searchIntent = result.getOrNull()
+    }
+
     val filteredRestaurants = if (searchQuery.isBlank()) {
         restaurants
     } else {
-        restaurants.filter {
-            it.name.contains(searchQuery, ignoreCase = true) ||
-            it.cuisine.contains(searchQuery, ignoreCase = true)
+        val intent = searchIntent
+        if (intent != null && !intent.isEmpty) {
+            restaurants.filter { restaurant ->
+                (intent.cuisine == null || restaurant.cuisine.contains(intent.cuisine, ignoreCase = true)) &&
+                (intent.priceRange == null || restaurant.priceRange.equals(intent.priceRange, ignoreCase = true)) &&
+                (intent.vibe == null || restaurant.vibeTags.any { tag -> tag.contains(intent.vibe, ignoreCase = true) })
+            }
+        } else {
+            restaurants.filter {
+                it.name.contains(searchQuery, ignoreCase = true) ||
+                it.cuisine.contains(searchQuery, ignoreCase = true)
+            }
         }
     }
 
@@ -171,8 +204,13 @@ fun MapScreen(
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                placeholder = { Text("Search restaurants...") },
+                placeholder = { Text("Try \"quiet cheap place for a date\"...") },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                trailingIcon = {
+                    if (isInterpretingSearch) {
+                        CircularProgressIndicator(modifier = Modifier.size(20.dp))
+                    }
+                },
                 shape = RoundedCornerShape(28.dp),
                 modifier = Modifier
                     .fillMaxWidth()

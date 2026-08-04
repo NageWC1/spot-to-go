@@ -1,7 +1,7 @@
 # Project Progress Report
 ## Spot To Go — Android Dissertation Project
-**Date:** 20 July 2026 (originally 4 June 2026, updated each session — see dated entries below)
-**Current Phase:** Android Development — core screens, navigation, and Firebase Auth complete; Places API + Gemini AI search remain
+**Date:** 4 August 2026 (originally 4 June 2026, updated each session — see dated entries below)
+**Current Phase:** Android Development — core screens, navigation, Firebase Auth, and Gemini AI search complete; Places API integration remains
 
 ---
 
@@ -125,8 +125,8 @@
 | Phase 2 | Google Maps + GPS location | DONE |
 | Phase 3 | Restaurant markers (seeded data) | DONE |
 | Phase 4 | Restaurant detail + video + directions | DONE |
-| Phase 5 | **Gemini API — Agentic AI Search Bar** | **UP NEXT** (currently plain keyword filter) |
-| Phase 6 | Live Places API integration | NOT STARTED (still hardcoded seed restaurants) |
+| Phase 5 | Gemini API — Agentic AI Search Bar | DONE — natural language query → structured filters, tested on device |
+| Phase 6 | Live Places API integration | **UP NEXT** (still hardcoded seed restaurants) |
 | Phase 7 | Firebase Auth (login/register) | DONE — tested on physical device, map gated behind login |
 | Phase 8 | UI polish, loading indicators, error handling | IN PROGRESS — 11 screens implemented incl. bottom nav, password visibility, loading spinners |
 | Phase 9 | Final report writing | IN PROGRESS — draft submitted for supervisor feedback |
@@ -249,6 +249,26 @@
 
 ---
 
+## Session — 4 August 2026
+
+### Gemini API — Agentic AI Search Bar Implemented
+
+- **Goal:** Replace the plain keyword filter with the Gemini-powered natural language search described in the prototype (see Session — 4 June 2026 planning notes)
+- **`Restaurant.kt`:** added `priceRange` ("budget" / "mid-range" / "premium") and `vibeTags` (e.g. `"romantic"`, `"quiet"`, `"family-friendly"`) to each seed restaurant, giving the AI attributes to filter against beyond name/cuisine
+- **`GeminiSearchService.kt` (new file):** sends the user's raw query to the Gemini API (`gemini-2.0-flash`, `generateContent` endpoint) with a prompt instructing it to return only a JSON object `{ cuisine, priceRange, vibe }`; parses the response into a `SearchIntent` data class; wrapped in `Result` (same pattern as `AuthRepository`) so failures are explicit rather than silently swallowed
+- **`MapScreen.kt`:** search box now debounces input by 600ms before calling Gemini (avoids firing a request per keystroke); while the AI call is in flight, or if it fails, the screen instantly falls back to the existing substring keyword filter over name/cuisine — the feature degrades gracefully rather than blocking search; added a small `CircularProgressIndicator` in the search field's trailing icon while a query is being interpreted
+- **Build wiring:** `GEMINI_API_KEY` added to `local.properties` (gitignored, never committed) and exposed to code via `buildConfigField` in `app/build.gradle.kts`, mirroring how `MAPS_API_KEY` is already injected — required enabling `buildFeatures.buildConfig = true`
+- **No new dependencies added:** the HTTP call uses `java.net.HttpURLConnection` and JSON parsing uses `org.json` (both built into the Android SDK), keeping the dependency footprint minimal per the project's "simple, minimal, demonstrable" guidance
+
+### Verified on Device
+
+- Built and installed on the `Medium_Phone` emulator (`gradlew installDebug`)
+- Typed `"quiet romantic place"` into the map search bar: markers filtered from 5 down to 2 (Bella Italia, Sushi World) — both are the only seed restaurants tagged `romantic` and `quiet`. Neither word appears in any restaurant's name or cuisine, which confirms the result came from Gemini's structured intent rather than the keyword-fallback path
+- Checked `logcat` during the run — no crashes, no request errors
+- Cleared the search box and confirmed all 5 markers return, verifying the reset/empty-query path
+
+---
+
 ## Key Decisions Made (For Reference)
 
 | Decision | Choice | Reason |
@@ -262,4 +282,6 @@
 | Video linking | Static place_id → YouTube URL map | Simple, demonstrable, avoids API restrictions |
 | Search bar — Phase 1 | Keyword filter over seed data | Working foundation; demonstrable without API dependency |
 | Search bar — Phase 2 | Gemini API natural language understanding | Required by prototype spec; genuine agentic AI behaviour |
+| Gemini networking | `HttpURLConnection` + `org.json` (no new dependency) | Both built into the Android SDK; keeps dependency footprint minimal for an academic-scope app |
+| Gemini failure handling | Fall back to keyword filter on error/timeout | Search must never dead-end just because the AI call failed or the network is slow |
 | Bibliography style | APA (apalike) | Standard for academic proposals |

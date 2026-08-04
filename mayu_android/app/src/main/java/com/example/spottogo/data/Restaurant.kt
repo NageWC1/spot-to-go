@@ -10,7 +10,9 @@ data class Restaurant(
     val address: String,
     val latLng: LatLng,
     val videoUrl: String,
-    val distanceMeters: Int
+    val distanceMeters: Int,
+    val priceRange: String,
+    val vibeTags: List<String>
 )
 
 object RestaurantRepository {
@@ -25,7 +27,9 @@ object RestaurantRepository {
                 address = "12 Harbour Street",
                 latLng = LatLng(userLat + 0.004, userLng + 0.002),
                 videoUrl = "https://www.youtube.com/watch?v=Oo6HXisGLoM",
-                distanceMeters = 450
+                distanceMeters = 450,
+                priceRange = "mid-range",
+                vibeTags = listOf("cosy", "family-friendly", "spicy")
             ),
             Restaurant(
                 placeId = "place_002",
@@ -35,7 +39,9 @@ object RestaurantRepository {
                 address = "88 West Avenue",
                 latLng = LatLng(userLat - 0.003, userLng + 0.005),
                 videoUrl = "https://www.youtube.com/watch?v=ZJthWmU0cKk",
-                distanceMeters = 620
+                distanceMeters = 620,
+                priceRange = "budget",
+                vibeTags = listOf("casual", "quick-bite", "cheap")
             ),
             Restaurant(
                 placeId = "place_003",
@@ -45,7 +51,9 @@ object RestaurantRepository {
                 address = "5 Crown Road",
                 latLng = LatLng(userLat + 0.002, userLng - 0.004),
                 videoUrl = "https://www.youtube.com/watch?v=lsNpOFcjLQg",
-                distanceMeters = 310
+                distanceMeters = 310,
+                priceRange = "premium",
+                vibeTags = listOf("romantic", "quiet", "date-night")
             ),
             Restaurant(
                 placeId = "place_004",
@@ -55,7 +63,9 @@ object RestaurantRepository {
                 address = "27 Market Lane",
                 latLng = LatLng(userLat - 0.005, userLng - 0.003),
                 videoUrl = "https://www.youtube.com/watch?v=RUV7IbcDzrk",
-                distanceMeters = 780
+                distanceMeters = 780,
+                priceRange = "budget",
+                vibeTags = listOf("casual", "family-friendly", "cheap")
             ),
             Restaurant(
                 placeId = "place_005",
@@ -65,7 +75,9 @@ object RestaurantRepository {
                 address = "31 Ocean Boulevard",
                 latLng = LatLng(userLat + 0.007, userLng + 0.001),
                 videoUrl = "https://www.youtube.com/watch?v=N1C6HBH4VrA",
-                distanceMeters = 950
+                distanceMeters = 950,
+                priceRange = "premium",
+                vibeTags = listOf("quiet", "romantic", "date-night")
             )
         )
     }
