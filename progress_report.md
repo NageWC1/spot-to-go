@@ -267,6 +267,20 @@
 - Checked `logcat` during the run — no crashes, no request errors
 - Cleared the search box and confirmed all 5 markers return, verifying the reset/empty-query path
 
+### Follow-up Verification — Marker → Detail → Video/Directions Flow
+
+- **Goal:** confirm that tapping a marker from an AI-filtered search result still leads correctly into the existing Detail → Video / Directions flow (this predates the Gemini work but had not been re-tested since the search changes)
+- Tapped a marker on the map → correctly opened `RestaurantDetailScreen` with the right restaurant's data
+- Tapped **Watch Video Preview** → correctly navigated to `VideoScreen` and launched YouTube with the stored video ID
+- Tapped **Get Directions** → correctly opened the in-app `DirectionsScreen` (origin/destination card, travel-mode chips, ETA, embedded mini-map)
+- Tapped **START** on the Directions screen → confirmed via `adb shell dumpsys activity activities` that the foreground activity switched to `com.google.android.apps.maps/com.google.android.maps.MapsActivity`, i.e. the real Google Maps app opened with turn-by-turn driving directions between the two coordinates
+- **Conclusion:** the full navigation chain (AI search → marker → detail → video/directions) works end-to-end; no regressions from the Gemini search changes
+
+### Two Issues Found During Verification
+
+1. **Gemini API key hitting quota errors.** Testing the same query multiple times in a row eventually returned an empty result set instead of a filtered one. Direct `curl` testing of the key against the Gemini endpoint confirmed a `429 RESOURCE_EXHAUSTED` response with `limit: 0` on the free tier for this key's Google Cloud project. This is a project/billing configuration issue, not an app bug — the app's fallback-to-keyword-search behaviour worked exactly as designed when the AI call failed, it just isn't a satisfying demo when it happens. **Action needed:** either enable quota/billing on the existing key's project, or generate a fresh key from a project that has free-tier quota available.
+2. **Seed video URLs are placeholders.** "Watch Video Preview" correctly opens YouTube with the stored `videoUrl`, but the hardcoded video IDs in `RestaurantRepository` (e.g. `Oo6HXisGLoM` for The Spice Garden) are not real/available videos, so YouTube reports "This video is unavailable." The launch mechanism itself works correctly — this is a content/data issue only. **Action needed:** replace the 5 placeholder video IDs with real YouTube video links before the next demo.
+
 ---
 
 ## Key Decisions Made (For Reference)
