@@ -1,7 +1,7 @@
 # Project Progress Report
 ## Spot To Go — Android Dissertation Project
-**Date:** 4 August 2026 (originally 4 June 2026, updated each session — see dated entries below)
-**Current Phase:** Android Development — core screens, navigation, Firebase Auth, and Gemini AI search complete; direction decided to move restaurant data (Places API), reviews, and video (YouTube Data API) to fully dynamic sourcing — paused pending resolution of Gemini API student access
+**Date:** 6 August 2026 (originally 4 June 2026, updated each session — see dated entries below)
+**Current Phase:** Android Development — core screens, navigation, Firebase Auth, and Gemini AI search complete; direction decided to move restaurant data (Places API), reviews, and video (YouTube Data API) to fully dynamic sourcing — paused pending resolution of Gemini API student access. Final report draft now includes four new architecture/flow diagrams (see Session — 6 August 2026 below).
 
 ---
 
@@ -313,6 +313,29 @@
 - Project owner is a student and is pursuing student-tier API access, expecting it may resolve the quota problem
 - **Expectation set during discussion:** there is no literal "unlimited" Gemini API tier, including paid tiers — higher tiers raise rate limits significantly but don't remove them. A properly-provisioned project (student or otherwise) should show a real non-zero quota number rather than `limit: 0`; if the *same* key/project is reused, waiting alone likely won't fix it — the Cloud Console quotas page would need checking directly
 - All Gemini-related work (including the dynamic-search direction above) is paused until this is sorted out
+
+---
+
+## Session — 6 August 2026
+
+### Final Report — Four New Diagrams Added
+
+- **Goal:** the final report (`final report/Spot_To_Go_Final_Report.tex`) already had a hand-drawn prototype image and one data-flow diagram; the report needed more visual explanation of the system for a reviewer, without duplicating what those two figures already show.
+- Added four new TikZ figures, each placed in the section it best supports rather than grouped together:
+  1. **Screen navigation map** (`fig:navmap`, Section 4.1) — all 11 implemented screens and every transition between them, colour-coded by auth/core/secondary screen. Unlike the existing data-flow diagram, which only tracks *data* moving through the app, this tracks *navigation* and includes screens the DFD omits (Register, Contact Us, Privacy Policy).
+  2. **Software architecture diagram** (`fig:arch`, new Section 4.2 "Software Architecture") — a four-layer view (UI → Navigation/State → Repositories → Platform/External), with a dashed box marking where the planned Google Places API client will attach. This makes visible, rather than just stated in prose, the reason Section 8's top-priority task (replacing the in-memory restaurant list) won't require changing any screen.
+  3. **Authentication sequence diagram** (`fig:authseq`, Section 4.5 "Authentication") — the tested register → `AuthRepository` → Firebase → session-check flow, backing up the "tested end-to-end on a physical device" claim already in the text with an actual diagram of that flow.
+  4. **Remaining-work dependency chain** (`fig:roadmap`, Section 8 "Remaining Work") — the three outstanding items (Places API, live search, back-press/testing) drawn as a dependency graph rather than a dated Gantt-style chart, since no fixed dates have been committed to yet; a dated chart would have overstated certainty the project doesn't have.
+- **Styling:** all four reuse the same node/arrow conventions as the existing data-flow diagram (`entity`/`process`/`store`-style boxes, `\Stealth` arrows, white-filled edge labels) so the report reads as one consistent visual language rather than four different diagram styles.
+
+### Build Verification
+
+- Confirmed `pdflatex` (MiKTeX) is available locally and used it to test-compile after every figure, rather than assuming the TikZ code was correct on the first pass.
+- Two real issues were caught and fixed this way:
+  - A `! LaTeX Error: Not allowed in LR mode` in the sequence diagram — the `actor` node style used `\\` line breaks without `align=center` set, which TikZ/pgf rejects outside a paragraph-capable node. Fixed by adding `align=center` to the style.
+  - The roadmap diagram's node layout was ~22cm wide against a ~16cm text width, producing a 171pt overfull hbox (the figure was overflowing the page margin). Fixed by wrapping all four new `tikzpicture` environments in `\resizebox{\textwidth}{!}{...}`, so each diagram scales to the page regardless of its internal coordinate extents.
+- After both fixes: full rebuild (`pdflatex` → `bibtex` → `pdflatex` ×2) completed with **0 warnings and 0 undefined references**. Four small pre-existing overfull-hbox warnings (46pt, 5pt, 15pt, 43pt — all caption-text justification, not figures) were confirmed present in the original committed `.tex` before these changes too, by compiling the pre-change version from `git show HEAD` side by side — so they were not introduced by this work.
+- Output: `final report/Spot_To_Go_Final_Report.pdf` regenerated locally (19 pages) and committed alongside the `.tex` source.
 
 ---
 

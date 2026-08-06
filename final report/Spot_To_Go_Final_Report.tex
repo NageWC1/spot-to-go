@@ -129,6 +129,121 @@ Figure~\ref{fig:prototype} shows the original hand-drawn prototype that the scre
     \label{fig:prototype}
 \end{figure}
 
+Figure~\ref{fig:navmap} traces the same eleven screens as an explicit navigation map, showing every transition a user can actually make, including the two secondary screens (Contact Us and Privacy Policy) and the bottom navigation bar added during testing (Section 6.1) that lets a user return from the Map screen to Home.
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+    core/.style={
+        rectangle, draw, thick, fill=blue!15,
+        minimum width=2.6cm, minimum height=0.9cm,
+        align=center, font=\small
+    },
+    auth/.style={
+        rectangle, draw, thick, fill=gray!15,
+        minimum width=2.6cm, minimum height=0.9cm,
+        align=center, font=\small
+    },
+    aux/.style={
+        rectangle, draw, thick, fill=yellow!20,
+        minimum width=2.6cm, minimum height=0.9cm,
+        align=center, font=\small
+    },
+    >=Stealth, thick,
+    lbl/.style={font=\footnotesize, fill=white, inner sep=1pt}
+]
+
+\node[auth] (splash)   at (0,    0)   {Splash};
+\node[auth] (login)    at (3.6,  0)   {Login};
+\node[auth] (register) at (3.6, -2.2) {Register};
+\node[core] (home)     at (7.6,  0)   {Home};
+\node[aux]  (contact)  at (7.6,  2.4) {Contact Us};
+\node[aux]  (privacy)  at (11.4, 2.4) {Privacy\\Policy};
+\node[core] (map)      at (11.4, 0)   {Map};
+\node[core] (detail)   at (11.4, -3)  {Restaurant\\Detail};
+\node[core] (video)    at (8,   -6)   {Video};
+\node[aux]  (tiktok)   at (4.4, -6)   {TikTok\\Link};
+\node[core] (dir)      at (15,  -3)   {Directions};
+
+\draw[->] (splash) -- (login);
+\draw[<->] (login) -- (register);
+\draw[->] (login) -- node[lbl, above]{authenticated} (home);
+\draw[->] (home) -- (contact);
+\draw[->] (home) -- (privacy);
+\draw[->] ([yshift= 3pt]home.east) -- node[lbl, above]{Explore Nearby} ([yshift= 3pt]map.west);
+\draw[->] ([yshift=-3pt]map.west)  -- node[lbl, below]{bottom nav} ([yshift=-3pt]home.east);
+\draw[->] (map) -- node[lbl, right]{tap marker} (detail);
+\draw[->] (detail.south west) -- node[lbl, left, sloped]{Watch Video} (video.north);
+\draw[->] (detail.south east) -- node[lbl, right, sloped]{Get Directions} (dir.north);
+\draw[->] (video) -- node[lbl, above]{TikTok search} (tiktok);
+
+\end{tikzpicture}%
+}
+\caption{Screen navigation map for Spot To Go. Gray nodes are the authentication screens, blue nodes are the core discovery flow, and yellow nodes are secondary screens reached from Home. The Map-to-Home bottom navigation link was added in response to a usability issue found during testing (Section 6.1).}
+\label{fig:navmap}
+\end{figure}
+
+\subsection{Software Architecture}
+
+Figure~\ref{fig:arch} shows the application in four layers rather than as a sequence of screens. The point of drawing it this way is to make explicit a design decision referenced throughout this report: every screen depends only on a repository interface, never on where that repository's data actually comes from. This is why Section 8's highest-priority task — replacing the in-memory restaurant list with a live Google Places API client — is described as requiring no change to the Map screen itself; the diagram shows that dependency boundary directly.
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+    layer/.style={
+        rectangle, draw, thick, fill=blue!10,
+        minimum width=13.6cm, minimum height=1cm,
+        align=center, font=\small\bfseries
+    },
+    box/.style={
+        rectangle, draw, thick, fill=white,
+        minimum width=3cm, minimum height=0.8cm,
+        align=center, font=\footnotesize
+    },
+    future/.style={
+        rectangle, draw, thick, dashed, fill=gray!5,
+        minimum width=3.4cm, minimum height=0.8cm,
+        align=center, font=\footnotesize
+    },
+    >=Stealth, thick
+]
+
+\node[layer] (uiL) at (0, 6) {};
+\node[font=\small\bfseries] at (-5.2, 6) {UI};
+\node[box] (screens) at (0, 6) {Compose UI Screens (11 screens, Material 3)};
+
+\node[layer] (navL) at (0, 4.2) {};
+\node[font=\small\bfseries] at (-5.2, 4.2) {Navigation};
+\node[box, minimum width=8cm] (nav) at (0, 4.2) {Navigation Compose Host + Shared Selected-Restaurant State};
+
+\node[layer] (repoL) at (0, 2.4) {};
+\node[font=\small\bfseries] at (-5.2, 2.4) {Repositories};
+\node[box] (authrepo) at (-3.2, 2.4) {AuthRepository};
+\node[box] (restrepo) at (3.2, 2.4) {RestaurantRepository};
+
+\node[layer] (svcL) at (0, 0.2) {};
+\node[font=\small\bfseries] at (-5.2, 0.2) {Platform / External};
+\node[box] (firebase) at (-5.2, 0.2) {Firebase\\Authentication};
+\node[box] (inmem) at (-1.2, 0.2) {In-memory\\restaurant list};
+\node[box] (maps) at (2.6, 0.2) {Maps SDK +\\Fused Location};
+\node[future] (places) at (6.4, 0.2) {Google Places API\\(planned, Section 8)};
+
+\draw[->] (screens) -- (nav);
+\draw[->] (nav) -- (authrepo);
+\draw[->] (nav) -- (restrepo);
+\draw[->] (authrepo) -- (firebase);
+\draw[->] (restrepo) -- (inmem);
+\draw[->] (restrepo) -- (maps);
+\draw[->, dashed] (restrepo.south east) -- (places.north west);
+
+\end{tikzpicture}%
+}
+\caption{Layered software architecture of Spot To Go. Screens depend only on the repository interfaces in the layer below; \texttt{RestaurantRepository} currently returns an in-memory list, and the dashed box shows where the planned Google Places API client will attach without requiring any change above the repository layer.}
+\label{fig:arch}
+\end{figure}
+
 \subsection{Data Flow}
 
 Figure~\ref{fig:dfd} shows the data flow through the application as it is currently implemented. A user first authenticates through Firebase; once signed in, the Home screen leads to the Map, which currently reads from an in-memory restaurant list rather than a live query — this stand-in is discussed further in Section 5.3 and Section 8. Selecting a marker opens the Restaurant Detail screen, from which the user can either watch a video or request directions; both actions hand off to an external app through an Android \texttt{Intent} rather than being handled inside Spot To Go itself.
@@ -225,6 +340,48 @@ Rather than embedding video playback inside the app with a \texttt{WebView}, the
 
 Login and registration are backed by Firebase Authentication through a single \texttt{AuthRepository} object, exposing \texttt{register}, \texttt{login}, \texttt{logout}, and an \texttt{isLoggedIn} check. Registration creates a Firebase user with email and password and sets the user's display name; login signs an existing user in through the same mechanism. The Map screen checks \texttt{isLoggedIn} itself and redirects to the Login screen if no session is active, so that the map — and everything reachable from it — is gated behind a real sign-in rather than a hardcoded credential check as originally proposed. This has been tested end-to-end on a physical Android device: registering a new account, being signed in automatically, and reaching the map.
 
+Figure~\ref{fig:authseq} sets out that tested flow as a sequence diagram, showing which calls are handled inside the app and which are delegated to Firebase.
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+    actor/.style={font=\small\bfseries, align=center},
+    lifeline/.style={dashed, thick, gray},
+    msg/.style={->, thick, >=Stealth},
+    lbl/.style={font=\footnotesize, fill=white, inner sep=1pt}
+]
+
+\def\yTop{0}
+\def\yBot{-8.5}
+
+\node[actor] (user) at (0, \yTop) {User};
+\node[actor] (screen) at (4, \yTop) {Login /\\Register Screen};
+\node[actor] (repo) at (8.4, \yTop) {AuthRepository};
+\node[actor] (firebase) at (12.6, \yTop) {Firebase\\Authentication};
+\node[actor] (map) at (16.2, \yTop) {Map Screen};
+
+\draw[lifeline] (user.south)     -- ++(0, \yBot);
+\draw[lifeline] (screen.south)   -- ++(0, \yBot);
+\draw[lifeline] (repo.south)     -- ++(0, \yBot);
+\draw[lifeline] (firebase.south) -- ++(0, \yBot);
+\draw[lifeline] (map.south)      -- ++(0, \yBot);
+
+\draw[msg] (0,-1.2)   -- node[lbl, above]{enters email + password} (4,-1.2);
+\draw[msg] (4,-2.2)   -- node[lbl, above]{register(email, pw)} (8.4,-2.2);
+\draw[msg] (8.4,-3.2) -- node[lbl, above]{createUserWithEmailAndPassword} (12.6,-3.2);
+\draw[msg] (12.6,-4.2) -- node[lbl, above]{authenticated user} (8.4,-4.2);
+\draw[msg] (8.4,-5.2) -- node[lbl, above]{session created} (4,-5.2);
+\draw[msg] (4,-6.2)  -- node[lbl, above]{navigate to Home} (0,-6.2);
+\draw[msg] (0,-7.2)  -- node[lbl, above]{Explore Nearby} (16.2,-7.2);
+\draw[msg] (16.2,-8.2) -- node[lbl, above]{isLoggedIn()} (8.4,-8.2);
+
+\end{tikzpicture}%
+}
+\caption{Sequence diagram of the tested authentication flow, from account registration through to the Map screen's own session check. \texttt{AuthRepository} is the only component that talks to Firebase directly; the Map screen re-checks \texttt{isLoggedIn} independently so it can never be reached without a valid session, regardless of how it was navigated to.}
+\label{fig:authseq}
+\end{figure}
+
 \subsection{Navigation and State}
 
 All eleven screens are connected through a single Navigation Compose host defined in \texttt{MainActivity}, with the splash screen as the start destination. Rather than passing the selected restaurant as a navigation argument on every route, the app holds it as a single piece of shared Compose state at the navigation level, set whenever a restaurant is chosen from the map. The Detail, Video, TikTok, and Directions screens all read from this same value, so the currently selected restaurant survives navigating between them.
@@ -293,6 +450,41 @@ Three pieces of work are outstanding, in priority order:
     \item \textbf{Live search.} Once real restaurant data is flowing, connect the existing search bar to the Places API's keyword parameter with a short debounce, replacing the current client-side filter over the placeholder list, and show a loading indicator while a search request is in flight.
     \item \textbf{Back-press polish and formal testing.} Add a press-back-again-to-exit confirmation on the Map screen, and carry out the structured functional test plan and the participant-based usability testing (Section 6.2) that were deferred until real restaurant data is available to test against.
 \end{enumerate}
+
+Figure~\ref{fig:roadmap} sets out the same three items as a dependency chain rather than a dated schedule, since no fixed dates have been committed to at this stage of the project. The ordering reflects a genuine dependency, not just a preference: live search cannot be connected to the Places API's keyword parameter (item 2) until that API call exists at all (item 1), whereas the back-press and testing work (item 3) is independent and could, in principle, proceed in parallel.
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+    done/.style={
+        rectangle, draw, thick, fill=green!15,
+        minimum width=6.6cm, minimum height=0.9cm,
+        align=center, font=\small
+    },
+    todo/.style={
+        rectangle, draw, thick, fill=red!10,
+        minimum width=6.6cm, minimum height=0.9cm,
+        align=center, font=\small
+    },
+    >=Stealth, thick,
+    lbl/.style={font=\footnotesize, fill=white, inner sep=1pt}
+]
+
+\node[done] (current) at (0, 0)     {\textbf{Current state}\\Eleven screens, auth, video and\\directions all working end-to-end};
+\node[todo] (places)  at (8, 1.8)   {\textbf{1. Places API integration}\\Not started --- highest priority};
+\node[todo] (search)  at (15.4, 1.8) {\textbf{2. Live search}\\Not started --- depends on \#1};
+\node[todo] (testing) at (8, -1.8)  {\textbf{3. Back-press polish +}\\\textbf{formal testing}\\Not started --- independent};
+
+\draw[->] (current.north) |- (places.west);
+\draw[->] (current.south) |- (testing.west);
+\draw[->] (places) -- node[lbl, above]{enables} (search);
+
+\end{tikzpicture}%
+}
+\caption{Remaining work as a dependency chain rather than a dated roadmap. The Places API integration (Section 8, item 1) blocks live search (item 2); formal back-press and usability testing (item 3) does not depend on either and could run in parallel.}
+\label{fig:roadmap}
+\end{figure}
 
 % ============================================================
 \section{Conclusion}
