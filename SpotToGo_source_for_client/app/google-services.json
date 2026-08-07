@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "610499230801",
+    "project_id": "spot-to-go",
+    "storage_bucket": "spot-to-go.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:610499230801:android:7bcb115b52a7f8e2c4cc70",
+        "android_client_info": {
+          "package_name": "com.example.spottogo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "610499230801-2qidnahd4u8c0ui9iobiua55rncm0mjj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBXIdhr6UXFTfE6JUpzu4Y0-kfJmJ9pm0A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "610499230801-2qidnahd4u8c0ui9iobiua55rncm0mjj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
