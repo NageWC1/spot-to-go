@@ -437,6 +437,17 @@ In practice, the risk this introduces is small and well-managed. Firebase Authen
 % ============================================================
 \section{Current Progress and Remaining Work}
 
+\subsection{Project Schedule}
+
+The work was planned against a fixed submission deadline, so the project was divided into seven sequential work packages and scheduled across the available months rather than left open-ended. Figure~\ref{fig:gantt} presents this plan as a Gantt chart, with each work package (WP1--WP7) mapped to a calendar window from April to September 2026. The packages were deliberately allowed to overlap where a later stage could begin before the previous one was fully closed --- for example, screen implementation (WP3--WP5) was staged so that mapping, detail/video, and search work could run into one another rather than waiting for a clean handover --- which kept progress continuous instead of stalling at package boundaries. As of the date of this draft, WP1 through WP5 are complete and WP6 (Testing and Writing) is in progress; the finer-grained dependency view of the tasks that remain within these final packages is given separately in Figure~\ref{fig:roadmap}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{images/gant chart.png}
+\caption{Project schedule across seven work packages (WP1--WP7), from the literature review through to final report and presentation. The chart shows the planned calendar window for each package; overlaps between adjacent packages were intentional, allowing later implementation stages to begin before the previous one was fully closed.}
+\label{fig:gantt}
+\end{figure}
+
 \subsection{Summary of Progress}
 
 All eleven planned screens are implemented and connected through a single navigation flow. The map renders live using the device's real GPS location and the Google Maps SDK. Firebase Authentication is live and has been tested end-to-end on a physical device, including the UX fixes listed in Section 6.1. Video and directions both work by handing off to external apps through Android intents, and the search bar filters the currently loaded restaurant list in real time.
