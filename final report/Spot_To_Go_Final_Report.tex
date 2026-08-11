@@ -10,7 +10,6 @@
 \usepackage{setspace}
 \usepackage{titlesec}
 \usepackage{parskip}
-\usepackage{hyperref}
 \usepackage{booktabs}
 \usepackage{array}
 \usepackage{natbib}
@@ -18,9 +17,22 @@
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage{tikz}
-\usetikzlibrary{arrows.meta}
+\usetikzlibrary{arrows.meta, shapes.geometric, positioning, calc, fit, shapes.multipart}
+
+% hyperref is loaded last (best practice) so it can patch the other packages
+% correctly; loading it too early caused duplicate figure/page PDF anchors.
+\usepackage{hyperref}
+\usepackage{bookmark}
 
 \doublespacing
+
+% --- Clickable, coloured cross-references and citations ---
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    citecolor=black,
+    urlcolor=blue!60!black
+}
 
 % --- Section formatting ---
 \titleformat{\section}{\large\bfseries}{\thesection.}{0.5em}{}
@@ -38,25 +50,84 @@
 % ============================================================
 \begin{document}
 
-% --- Title Block ---
+% --- Title Page (manual, so front matter can be numbered i, ii, ... ) ---
+\pagenumbering{roman}
+\thispagestyle{empty}
 \begin{center}
-    {\LARGE \textbf{Spot To Go: A Location-Based Android Application}} \\[0.5em]
-    {\large \textbf{for Restaurant Discovery with Video Integration}} \\[1.5em]
-    {\normalsize Final Project Report --- Draft} \\[0.3em]
-    {\normalsize Prepared for supervisor review and feedback} \\[2em]
-\end{center}
+    \vspace*{2cm}
 
-\hrule
-\vspace{2em}
+    {\LARGE \textbf{Spot To Go: A Location-Based Android Application}} \\[0.6em]
+    {\large \textbf{for Restaurant Discovery with Video Integration}} \\[2.5em]
+
+    {\large Final Project Report} \\[0.4em]
+    {\normalsize (Draft submitted for supervisor review and feedback)} \\[3em]
+
+    \begin{tabular}{rl}
+        \textbf{Project type:} & Undergraduate final-year project \\[0.4em]
+        \textbf{Platform:}     & Android (Kotlin, Jetpack Compose) \\[0.4em]
+        \textbf{Date:}         & August 2026 \\
+    \end{tabular}
+
+    \vfill
+
+    {\normalsize A report submitted in partial fulfilment of the requirements} \\
+    {\normalsize for the degree programme, describing the design, implementation,} \\
+    {\normalsize and current progress of the Spot To Go application.} \\[2em]
+\end{center}
+\clearpage
+
+% ============================================================
+% --- Abstract ---
+\begin{abstract}
+\noindent
+Choosing where to eat is still driven largely by star ratings and short text reviews, neither of which conveys the atmosphere, food presentation, or overall experience of a place particularly well. This report presents \textbf{Spot To Go}, an Android application that pairs a live, location-aware map of nearby restaurants with a direct link to a real short-form video of each one, so that a user can form a more grounded impression before deciding where to go. The application is built in Kotlin using Jetpack Compose and Navigation Compose, draws the user's position from the Fused Location Provider, renders restaurants on the Google Maps SDK, and gates the experience behind live Firebase Authentication. Video previews and turn-by-turn directions are delegated to the platform apps the user already trusts through Android intents. This document restates the project aim and objectives with their current status, revisits and updates the related literature, presents the system design using UML and flowchart notation, describes the implemented screens, and evaluates the work carried out so far. Eleven screens are fully implemented and connected, authentication has been tested end-to-end on a physical device, and the remaining work --- principally replacing the placeholder restaurant data with a live Google Places API integration --- is scoped and scheduled. The report closes with a project schedule and a clear statement of how the work will be taken forward to completion.
+\end{abstract}
+
+% ============================================================
+% --- Acknowledgements ---
+\newpage
+\section*{Acknowledgements}
+\addcontentsline{toc}{section}{Acknowledgements}
+
+I would like to thank my project supervisor for their continued guidance, and in particular for the detailed feedback on the earlier draft of this report, which directly shaped the structure and the additions presented here. I am grateful for the time taken to review the work and to suggest concrete improvements to its academic presentation.
+
+I would also like to thank my family and friends for their patience and encouragement throughout the project, and the wider Android and open-source developer community, whose freely available documentation and examples made much of the implementation possible.
+
+Finally, I acknowledge the developer tools and platform services --- Android Studio, the Google Maps and Places platforms, and Firebase --- that provided the foundation on which this application was built.
+
+% ============================================================
+% --- Front matter listings ---
+\newpage
+\tableofcontents
+\newpage
+\listoffigures
+\clearpage
+
+% --- Body starts here; restart page numbering at 1 ---
+\pagenumbering{arabic}
 
 % ============================================================
 \section{Introduction}
 
+\subsection{Overview}
+
 This report documents the design, implementation, and current progress of ``Spot To Go,'' an Android application that allows users to discover nearby restaurants on an interactive map and access real-life video previews before deciding where to go. It follows on from the dissertation proposal submitted earlier in the project and reflects the system as it has actually been built, rather than only as it was originally planned.
 
-The core problem motivating this project remains unchanged. Existing discovery platforms present restaurants through star ratings and short text reviews, both of which struggle to communicate atmosphere, food presentation, and overall experience. Short-form video, by contrast, has become one of the most trusted formats for conveying real-world experience \citep{dellarocas2003, cheung2009}. Spot To Go addresses this gap by pairing a live map of nearby restaurants with a direct link to a real video of each one, so a user can make a more informed decision before travelling anywhere.
+\subsection{Background and Context}
 
-This document is structured to give an honest account of progress: it restates the aim and objectives with their current status, revisits the literature review, describes the system as designed and implemented, evaluates what has been tested so far, updates the risk and ethical analysis in light of the real authentication system now in place, and closes with a clear statement of what remains to be built. Since the purpose of this draft is to gather feedback before the final phase of work, sections that describe incomplete features are marked explicitly rather than glossed over.
+The way people decide where to eat has shifted with the devices they carry. A smartphone now sits between the diner and the decision at almost every stage: locating options, comparing them, reading what others thought, and navigating to the chosen place. Location-based services, which tailor information to a device's real-world position, have become the connective tissue of this experience, and mapping and place-search platforms expose that capability to any application through well-documented programming interfaces \citep{google_places, android_location}. At the same time, the format in which people consume and trust information about places has changed. Short-form video --- popularised by platforms such as TikTok, Instagram Reels, and YouTube Shorts --- has grown into one of the most widely consumed types of online content, and a substantial and growing share of daily media time is now spent watching it \citep{datareportal2024, montag2021}. For a decision as experiential as choosing a restaurant, a fifteen-second clip of the room, the plates, and the people in it communicates something that a numerical average cannot.
+
+\subsection{Problem Statement}
+
+The core problem motivating this project is the gap between how restaurants are \emph{presented} on discovery platforms and how diners actually \emph{form impressions} of them. Existing platforms present restaurants primarily through star ratings and short text reviews. Both compress a rich, multi-sensory experience into a single number or a few sentences, and both struggle to communicate atmosphere, portion size, food presentation, and the general feel of a place. Star ratings in particular aggregate away exactly the detail a diner is trying to judge, and text reviews are slow to read and easy to distrust \citep{dellarocas2003, cheung2009}. Short-form video, by contrast, has become one of the most credible and effective formats for conveying real-world experience, because it shows the place rather than describing it \citep{kaplan2010, montag2021}. Yet mainstream restaurant-discovery tools do not place that video directly alongside the map and the ``go here now'' decision; a user must typically leave the map, open a separate video app, and search by hand. Spot To Go addresses this gap by pairing a live map of nearby restaurants with a direct, one-tap link to a real video of each one, so that a user can make a more informed decision before travelling anywhere.
+
+\subsection{Aim and Contributions}
+
+The aim of the project, stated in full in Section~2, is to design and build an Android application that unifies location-aware restaurant discovery and short-form video preview in a single, coherent flow. In meeting that aim, the work presented here makes three practical contributions. First, it delivers a complete, working Android application of eleven connected screens, built with a current, industry-standard toolset (Kotlin and Jetpack Compose) rather than a legacy one. Second, it demonstrates a clean separation between the user interface and its data sources, designed specifically so that the placeholder restaurant data can be replaced with a live Google Places API integration without reworking any screen. Third, it grounds the design in an updated review of the relevant literature and expresses that design through standard UML and flowchart notation, so that the system can be understood and extended by others.
+
+\subsection{Report Structure}
+
+This document is structured to give an honest account of progress: it restates the aim and objectives with their current status (Section~2), revisits and updates the literature review (Section~3), describes the system as designed using UML and flowchart notation (Section~4) and as implemented (Section~5), evaluates what has been tested so far (Section~6), updates the risk and ethical analysis in light of the real authentication system now in place (Section~7), and closes with a project schedule and a clear statement of what remains to be built (Sections~8 and~9). Since the purpose of this draft is to gather feedback before the final phase of work, sections that describe incomplete features are marked explicitly rather than glossed over.
 
 % ============================================================
 \section{Aim and Objectives}
@@ -105,11 +176,11 @@ Location-based services (LBS) use the geographic position of a device to deliver
 
 \subsection{Video-Based User-Generated Content and Consumer Decisions}
 
-\citet{dellarocas2003} frames user-generated content as a digital extension of word-of-mouth communication with a measurable influence on purchasing decisions. \citet{kaplan2010} and \citet{cheung2009} both identify video specifically as more credible and more effective than text at communicating atmosphere and experiential quality. This is the central premise the app now demonstrates in working form: from the restaurant detail screen, a user can open a real video of the restaurant with a single tap, and the app also offers a second path to a TikTok search for the same restaurant. Both actions hand off to the platform the user already trusts, rather than attempting to recreate video playback inside the app.
+\citet{dellarocas2003} frames user-generated content as a digital extension of word-of-mouth communication with a measurable influence on purchasing decisions. \citet{kaplan2010} and \citet{cheung2009} both identify video specifically as more credible and more effective than text at communicating atmosphere and experiential quality. More recent work confirms that this shift has accelerated with the rise of short-form video: \citet{montag2021} examine why platforms such as TikTok hold attention so effectively, linking their appeal to the immediacy and authenticity of short, real-world clips, while \citet{barta2023} show empirically that short-form video content on TikTok measurably shapes consumer attitudes and intentions, particularly when the content feels genuine rather than staged. The scale of this behaviour is now considerable: industry measurement reports place short-form video among the most consumed categories of online content, accounting for a large and rising share of daily media time \citep{datareportal2024}. These newer sources strengthen, rather than replace, the older foundational work: the mechanism Dellarocas described in 2003 is the same one now operating at far greater scale through video. This is the central premise the app demonstrates in working form: from the restaurant detail screen, a user can open a real video of the restaurant with a single tap, and the app also offers a second path to a TikTok search for the same restaurant. Both actions hand off to the platform the user already trusts, rather than attempting to recreate video playback inside the app.
 
 \subsection{Android Mobile Application Development}
 
-\citet{wasserman2010} identifies device fragmentation, limited processing resources, and state management across screen transitions as recurring challenges in mobile development. The proposal addressed state management through the Activity lifecycle; the implemented app instead addresses it through Jetpack Compose and Navigation Compose, in which each screen is a composable function managed by a single navigation host. This is a deviation from the proposal, and Section 5.6 explains the reasoning behind it in full. In short, the underlying challenge Wasserman describes — predictable state across navigation events — is still the driving design concern; only the specific mechanism used to solve it has changed.
+\citet{wasserman2010} identifies device fragmentation, limited processing resources, and state management across screen transitions as recurring challenges in mobile development. While that analysis remains a useful framing of the problem space, the tooling has moved on considerably since it was written. The proposal addressed state management through the Activity lifecycle; the implemented app instead adopts Jetpack Compose and Navigation Compose, now Google's officially recommended toolkit for building native Android user interfaces \citep{jetpack_compose}, in which each screen is a composable function managed by a single navigation host. This is a deviation from the proposal, and Section 4.1 explains the reasoning behind it in full. In short, the underlying challenge Wasserman describes --- predictable state across navigation events --- is still the driving design concern; only the specific mechanism used to solve it has changed, in line with current Android development practice.
 
 The Google Play Services suite — the Maps SDK, the Fused Location Provider, and (prospectively) the Places API — remains the standardised, well-documented toolset underpinning the location-aware features of the app, exactly as anticipated in the proposal.
 
@@ -122,7 +193,7 @@ The proposal specified a Java, single-Activity-per-screen architecture. The impl
 
 Figure~\ref{fig:prototype} shows the original hand-drawn prototype that the screen set was designed against. Eleven screens have been implemented in total: a Splash screen, Login and Registration, a Home screen, the Map, Restaurant Detail, a Video screen, a TikTok link screen, Directions, Contact Us, and a Privacy Policy screen. The last four of these — the TikTok link screen, Contact Us, and Privacy Policy — extend beyond the six views sketched in the original prototype; they were added to give the video feature a second, working path (TikTok as well as YouTube) and to meet ordinary expectations of a publishable app (a contact channel and a privacy statement), without changing the core flow the prototype describes.
 
-\begin{figure}[h!]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.92\textwidth]{images/prototype.jpeg}
     \caption{Original hand-drawn prototype of the Spot To Go application, showing the planned flow across login, home search, the map with restaurant markers, restaurant detail, video playback, and directions. This layout directly informed the screen set described above.}
@@ -184,6 +255,168 @@ Figure~\ref{fig:navmap} traces the same eleven screens as an explicit navigation
 \label{fig:navmap}
 \end{figure}
 
+\subsection{Use Case Model (UML)}
+
+Before describing how the system is built, it is worth stating precisely what it lets a user do. Figure~\ref{fig:usecase} presents this as a UML use case diagram. The single human actor, the \emph{User}, interacts with seven use cases enclosed by the system boundary, while three external services --- Firebase, the Google Maps platform, and YouTube/TikTok --- act as secondary actors that the system depends on to fulfil those cases. The diagram also captures two structural relationships that matter for the design: viewing restaurant details \emph{includes} first viewing the map (a user cannot open a detail screen without selecting a marker), and both watching a video and getting directions \emph{extend} the detail use case, since they are optional actions launched from it rather than steps every user must take.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.92\textwidth}{!}{%
+\begin{tikzpicture}[
+    actor/.style={font=\small, align=center},
+    usecase/.style={
+        draw, thick, ellipse, fill=blue!8,
+        minimum width=3.4cm, minimum height=1.35cm,
+        align=center, font=\footnotesize, inner sep=1pt
+    },
+    ext/.style={font=\small, align=center},
+    >=Stealth
+]
+
+% System boundary
+\draw[thick, rounded corners] (-1.2,-11.4) rectangle (7.3,1.6);
+\node[font=\small\bfseries] at (3.05,1.15) {Spot To Go};
+
+% Use cases (generous vertical spacing so ellipses never touch)
+\node[usecase] (register) at (3.05,  0.0)  {Register\\account};
+\node[usecase] (login)    at (3.05, -2.0)  {Log in};
+\node[usecase] (map)      at (3.05, -4.0)  {View map of\\nearby restaurants};
+\node[usecase] (search)   at (3.05, -6.0)  {Search /\\filter restaurants};
+\node[usecase] (detail)   at (3.05, -8.0)  {View restaurant\\details};
+\node[usecase] (video)    at (5.4,  -10.3) {Watch preview\\video};
+\node[usecase] (dir)      at (0.7,  -10.3) {Get directions};
+
+% Primary actor (User) - simple stick figure
+\begin{scope}[shift={(-4.4,-4.0)}]
+    \draw[thick] (0,0) circle (0.28);
+    \draw[thick] (0,-0.28) -- (0,-1.15);
+    \draw[thick] (-0.5,-0.6) -- (0.5,-0.6);
+    \draw[thick] (0,-1.15) -- (-0.4,-1.8);
+    \draw[thick] (0,-1.15) -- (0.4,-1.8);
+\end{scope}
+\node[actor] at (-4.4,-6.3) {\textbf{User}};
+
+% Secondary actors (external systems)
+\node[ext, draw, thick, fill=gray!10, minimum height=0.8cm] (firebase) at (11.2,-1.0) {Firebase\\Authentication};
+\node[ext, draw, thick, fill=gray!10, minimum height=0.8cm] (gmaps)    at (11.2,-5.0) {Google Maps\\Platform};
+\node[ext, draw, thick, fill=gray!10, minimum height=0.8cm] (yt)       at (11.2,-10.3) {YouTube /\\TikTok};
+
+% User associations
+\draw[thick] (-3.9,-4.0) -- (register.west);
+\draw[thick] (-3.9,-4.0) -- (login.west);
+\draw[thick] (-3.9,-4.0) -- (map.west);
+\draw[thick] (-3.9,-4.0) -- (search.west);
+\draw[thick] (-3.9,-4.0) -- (detail.west);
+
+% Secondary actor associations
+\draw[thick] (register.east) -- (firebase.west);
+\draw[thick] (login.east) -- (firebase.west);
+\draw[thick] (map.east) -- (gmaps.west);
+\draw[thick] (dir.east) -- (gmaps.west);
+\draw[thick] (video.east) -- (yt.west);
+
+% include relationship: detail includes map, routed to the RIGHT to avoid crossing other ellipses
+\draw[->, dashed] (detail.east) to[out=0, in=0, looseness=1.4]
+      node[font=\scriptsize, fill=white, inner sep=1pt, pos=0.5]{$\ll$include$\gg$} (map.east);
+% extend relationships: video and directions extend the detail use case
+\draw[->, dashed] (video.north) -- node[font=\scriptsize, fill=white, inner sep=1pt, pos=0.55]{$\ll$extend$\gg$} (detail.south east);
+\draw[->, dashed] (dir.north) -- node[font=\scriptsize, fill=white, inner sep=1pt, pos=0.55]{$\ll$extend$\gg$} (detail.south west);
+
+\end{tikzpicture}%
+}
+\caption{UML use case diagram for Spot To Go. The User is the single primary actor; Firebase, the Google Maps platform, and YouTube/TikTok are secondary actors the system relies on. Viewing details \emph{includes} viewing the map, and watching a video or getting directions \emph{extend} the detail use case as optional follow-on actions.}
+\label{fig:usecase}
+\end{figure}
+
+\subsection{Class Design (UML)}
+
+Figure~\ref{fig:classdiagram} expresses the same system as a UML class diagram, focused on the classes that carry behaviour rather than on every composable screen. \texttt{MainActivity} hosts the navigation graph and owns the single shared \texttt{selectedRestaurant} state that the detail, video, and directions screens read. The two repositories, \texttt{AuthRepository} and \texttt{RestaurantRepository}, are the only classes that talk to external services, and \texttt{RestaurantRepository} produces \texttt{Restaurant} objects --- the plain data class that every discovery screen ultimately consumes. Drawing the design this way makes the central architectural decision visible as a structural fact: the screens depend on \texttt{RestaurantRepository}'s interface and on the \texttt{Restaurant} type, not on where the data originates, which is exactly why the planned swap to a live Places-backed repository (Section~8) leaves the screens untouched.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.96\textwidth}{!}{%
+\begin{tikzpicture}[
+    class/.style={
+        rectangle split, rectangle split parts=3, draw, thick,
+        fill=blue!5, align=left, font=\scriptsize,
+        text width=4.0cm, inner sep=3pt
+    },
+    >=Stealth, thick
+]
+
+\node[class] (main) at (0,0) {
+    \textbf{MainActivity}
+    \nodepart{second}
+    - navController : NavHostController\\
+    - selectedRestaurant : Restaurant?
+    \nodepart{third}
+    + setContent()\\
+    + NavHost() : composable
+};
+
+\node[class] (authrepo) at (-5.4,-4.0) {
+    \textbf{AuthRepository}
+    \nodepart{second}
+    - auth : FirebaseAuth
+    \nodepart{third}
+    + register(email, pw)\\
+    + login(email, pw)\\
+    + logout()\\
+    + isLoggedIn() : Boolean
+};
+
+\node[class] (restrepo) at (0,-4.0) {
+    \textbf{RestaurantRepository}
+    \nodepart{second}
+    - items : List$<$Restaurant$>$
+    \nodepart{third}
+    + getNearbyRestaurants(\\
+    \quad lat, lng) : List$<$Restaurant$>$
+};
+
+\node[class] (restaurant) at (5.6,-7.6) {
+    \textbf{Restaurant} \textit{(data class)}
+    \nodepart{second}
+    + name : String\\
+    + cuisine : String\\
+    + rating : Double\\
+    + distanceMeters : Int\\
+    + address : String\\
+    + lat : Double\\
+    + lng : Double\\
+    + videoUrl : String
+};
+
+\node[class] (screens) at (-5.4,-8.0) {
+    \textbf{Screens} \textit{(composables)}
+    \nodepart{second}
+    Map, RestaurantDetail,\\
+    Video, TikTokLink,\\
+    Directions, Login, Register,\\
+    Home, Splash, Contact, Privacy
+    \nodepart{third}
+    read shared state; call repositories
+};
+
+% Relationships (routed so no line crosses a class box)
+\draw[->] (main.south west) -- node[font=\scriptsize, fill=white, inner sep=1pt, pos=0.5]{uses} (authrepo.north);
+\draw[->] (main.south) -- node[font=\scriptsize, fill=white, inner sep=1pt, pos=0.55]{uses} (restrepo.north);
+\draw[->] (restrepo.south east) -- node[font=\scriptsize, fill=white, inner sep=1pt, pos=0.5]{creates} (restaurant.north west);
+% MainActivity holds a reference to the selected Restaurant (dashed, far right)
+\draw[->, dashed] (main.east) to[out=0, in=90]
+      node[font=\scriptsize, fill=white, inner sep=1pt, pos=0.5]{holds ref} (restaurant.north);
+% Screens are hosted by MainActivity (up the left side, clear of RestaurantRepository)
+\draw[->] (screens.north) to[out=90, in=180]
+      node[font=\scriptsize, fill=white, inner sep=1pt, pos=0.55]{hosted by} (main.west);
+% Screens consume Restaurant objects (dashed, along the bottom)
+\draw[->, dashed] (screens.east) -- node[font=\scriptsize, fill=white, inner sep=1pt, pos=0.5]{consume} (restaurant.west);
+
+\end{tikzpicture}%
+}
+\caption{UML class diagram of the core Spot To Go classes. Screens are hosted by \texttt{MainActivity} and depend on the \texttt{RestaurantRepository} interface and the \texttt{Restaurant} data type, never on the underlying data source --- the property that lets the Places API integration in Section~8 attach without changing any screen.}
+\label{fig:classdiagram}
+\end{figure}
+
 \subsection{Software Architecture}
 
 Figure~\ref{fig:arch} shows the application in four layers rather than as a sequence of screens. The point of drawing it this way is to make explicit a design decision referenced throughout this report: every screen depends only on a repository interface, never on where that repository's data actually comes from. This is why Section 8's highest-priority task — replacing the in-memory restaurant list with a live Google Places API client — is described as requiring no change to the Map screen itself; the diagram shows that dependency boundary directly.
@@ -211,24 +444,24 @@ Figure~\ref{fig:arch} shows the application in four layers rather than as a sequ
 ]
 
 \node[layer] (uiL) at (0, 6) {};
-\node[font=\small\bfseries] at (-5.2, 6) {UI};
+\node[font=\small\bfseries, anchor=east] at (-7.2, 6) {UI};
 \node[box] (screens) at (0, 6) {Compose UI Screens (11 screens, Material 3)};
 
 \node[layer] (navL) at (0, 4.2) {};
-\node[font=\small\bfseries] at (-5.2, 4.2) {Navigation};
+\node[font=\small\bfseries, anchor=east] at (-7.2, 4.2) {Navigation};
 \node[box, minimum width=8cm] (nav) at (0, 4.2) {Navigation Compose Host + Shared Selected-Restaurant State};
 
 \node[layer] (repoL) at (0, 2.4) {};
-\node[font=\small\bfseries] at (-5.2, 2.4) {Repositories};
+\node[font=\small\bfseries, anchor=east] at (-7.2, 2.4) {Repositories};
 \node[box] (authrepo) at (-3.2, 2.4) {AuthRepository};
 \node[box] (restrepo) at (3.2, 2.4) {RestaurantRepository};
 
 \node[layer] (svcL) at (0, 0.2) {};
-\node[font=\small\bfseries] at (-5.2, 0.2) {Platform / External};
-\node[box] (firebase) at (-5.2, 0.2) {Firebase\\Authentication};
+\node[font=\small\bfseries, anchor=east, align=right] at (-7.2, 0.2) {Platform /\\External};
+\node[box] (firebase) at (-5.0, 0.2) {Firebase\\Authentication};
 \node[box] (inmem) at (-1.2, 0.2) {In-memory\\restaurant list};
 \node[box] (maps) at (2.6, 0.2) {Maps SDK +\\Fused Location};
-\node[future] (places) at (6.4, 0.2) {Google Places API\\(planned, Section 8)};
+\node[future] (places) at (6.2, 0.2) {Google Places API\\(planned, Section 8)};
 
 \draw[->] (screens) -- (nav);
 \draw[->] (nav) -- (authrepo);
@@ -297,6 +530,73 @@ Figure~\ref{fig:dfd} shows the data flow through the application as it is curren
 \label{fig:dfd}
 \end{figure}
 
+\subsection{Application Flowchart}
+
+Where the data flow diagram in Figure~\ref{fig:dfd} shows \emph{what} data moves between components, Figure~\ref{fig:flowchart} shows the \emph{control flow} a user actually passes through at runtime, drawn in standard flowchart notation. Rounded terminators mark the start and the two exit points, rectangles denote processing steps, and diamonds denote decisions the app makes. Presenting the flow this way makes the conditional logic explicit --- in particular the two gates that shape the experience: whether a valid session exists (which decides whether the user reaches Home or is sent to log in) and whether location permission has been granted (which decides whether the map can centre on the user's real position). The three optional branches out of the detail screen --- watch a video, get directions, or go back --- are also shown as an explicit decision rather than an implied one.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.82\textwidth}{!}{%
+\begin{tikzpicture}[
+    node distance=1.1cm and 1.6cm,
+    start/.style={
+        rectangle, rounded corners=10pt, draw, thick, fill=green!15,
+        minimum width=3.2cm, minimum height=0.85cm, align=center, font=\footnotesize
+    },
+    stop/.style={
+        rectangle, rounded corners=10pt, draw, thick, fill=red!12,
+        minimum width=3.2cm, minimum height=0.85cm, align=center, font=\footnotesize
+    },
+    proc/.style={
+        rectangle, draw, thick, fill=blue!10,
+        minimum width=3.4cm, minimum height=0.85cm, align=center, font=\footnotesize
+    },
+    dec/.style={
+        diamond, draw, thick, fill=yellow!25, aspect=2.2,
+        inner sep=1pt, align=center, font=\scriptsize
+    },
+    >=Stealth, thick,
+    lbl/.style={font=\scriptsize, fill=white, inner sep=1.5pt}
+]
+
+\node[start] (start) {Launch app\\(Splash screen)};
+\node[dec, below=of start] (logged) {Valid session?};
+\node[proc, left=2.4cm of logged] (login) {Show Login /\\Register screen};
+\node[dec, below=1.2cm of login] (creds) {Credentials\\valid?};
+\node[proc, below=of logged] (home) {Home screen};
+\node[proc, below=of home] (explore) {Tap ``Explore Nearby''\\$\rightarrow$ Map screen};
+\node[dec, below=of explore] (perm) {Location\\permission\\granted?};
+\node[proc, right=2.6cm of perm] (askperm) {Request\\permission};
+\node[proc, below=of perm] (loadmap) {Load nearby restaurants,\\render markers on map};
+\node[proc, below=of loadmap] (tap) {Tap a marker\\$\rightarrow$ Restaurant Detail};
+\node[dec, below=of tap] (action) {Which\\action?};
+\node[stop, below left=1.3cm and 0.1cm of action] (video) {Open video\\(YouTube / TikTok)};
+\node[stop, below right=1.3cm and 0.1cm of action] (dirs) {Open directions\\(Google Maps)};
+
+% Main flow
+\draw[->] (start) -- (logged);
+\draw[->] (logged) -- node[lbl, right]{yes} (home);
+\draw[->] (logged) -- node[lbl, above]{no} (login);
+\draw[->] (login) -- (creds);
+\draw[->] (creds.west) -- ++(-1.6,0) node[lbl, midway, below]{no (retry)} |- (login.west);
+\draw[->] (creds.east) -- node[lbl, above]{yes} ++(1.0,0) |- (home.west);
+\draw[->] (home) -- (explore);
+\draw[->] (explore) -- (perm);
+\draw[->] (perm) -- node[lbl, above]{no} (askperm);
+\draw[->] (askperm.south) -- ++(0,-0.9) node[lbl, midway, right]{re-check} -| ($(perm.south)+(0.3,0)$);
+\draw[->] (perm) -- node[lbl, right]{yes} (loadmap);
+\draw[->] (loadmap) -- (tap);
+\draw[->] (tap) -- (action);
+\draw[->] (action.west) -- node[lbl, above, pos=0.4]{watch} (video.north);
+\draw[->] (action.east) -- node[lbl, above, pos=0.4]{directions} (dirs.north);
+\draw[->] (action.south) -- node[lbl, right]{back} ++(0,-0.55) -| (tap.south east);
+
+\end{tikzpicture}%
+}
+\caption{Application flowchart showing the runtime control flow of Spot To Go in standard notation: rounded terminators for entry and exit points, rectangles for processing steps, and diamonds for decisions. The two decision points --- session validity and location permission --- are the conditions that determine which path a user takes through the app.}
+\label{fig:flowchart}
+\end{figure}
+
 % ============================================================
 \section{Implementation}
 
@@ -326,7 +626,7 @@ Figure~\ref{fig:screens} shows all eleven implemented screens. Every screen is b
 
 \subsection{Location and Mapping}
 
-The Map screen uses the Fused Location Provider (\texttt{FusedLocationProviderClient}) to read the device's last known location, after requesting the \texttt{ACCESS\_FINE\_LOCATION} runtime permission through the Accompanist Permissions library. The map itself is rendered with the Maps Compose library (\texttt{com.google.maps.android.compose}), which wraps the native Google Maps SDK for use inside a composable. Each restaurant is shown as a marker with the restaurant's name and a snippet combining its cuisine and rating; tapping a marker opens the Restaurant Detail screen for that restaurant. The Directions screen uses the same pattern independently, so that if the user's location changes between viewing the map and requesting directions, the directions screen still reflects a current position.
+The Map screen uses the Fused Location Provider (\texttt{FusedLocationProviderClient}), Google's recommended location API on Android \citep{android_location}, to read the device's last known location, after requesting the \texttt{ACCESS\_FINE\_LOCATION} runtime permission through the Accompanist Permissions library. The map itself is rendered with the Maps Compose library (\texttt{com.google.maps.android.compose}), which wraps the native Google Maps SDK for use inside a composable. Each restaurant is shown as a marker with the restaurant's name and a snippet combining its cuisine and rating; tapping a marker opens the Restaurant Detail screen for that restaurant. The Directions screen uses the same pattern independently, so that if the user's location changes between viewing the map and requesting directions, the directions screen still reflects a current position.
 
 \subsection{Restaurant Data}
 
@@ -338,7 +638,7 @@ Rather than embedding video playback inside the app with a \texttt{WebView}, the
 
 \subsection{Authentication}
 
-Login and registration are backed by Firebase Authentication through a single \texttt{AuthRepository} object, exposing \texttt{register}, \texttt{login}, \texttt{logout}, and an \texttt{isLoggedIn} check. Registration creates a Firebase user with email and password and sets the user's display name; login signs an existing user in through the same mechanism. The Map screen checks \texttt{isLoggedIn} itself and redirects to the Login screen if no session is active, so that the map — and everything reachable from it — is gated behind a real sign-in rather than a hardcoded credential check as originally proposed. This has been tested end-to-end on a physical Android device: registering a new account, being signed in automatically, and reaching the map.
+Login and registration are backed by Firebase Authentication \citep{firebase_auth} through a single \texttt{AuthRepository} object, exposing \texttt{register}, \texttt{login}, \texttt{logout}, and an \texttt{isLoggedIn} check. Registration creates a Firebase user with email and password and sets the user's display name; login signs an existing user in through the same mechanism. The Map screen checks \texttt{isLoggedIn} itself and redirects to the Login screen if no session is active, so that the map — and everything reachable from it — is gated behind a real sign-in rather than a hardcoded credential check as originally proposed. This has been tested end-to-end on a physical Android device: registering a new account, being signed in automatically, and reaching the map.
 
 Figure~\ref{fig:authseq} sets out that tested flow as a sequence diagram, showing which calls are handled inside the app and which are delegated to Firebase.
 
@@ -457,7 +757,7 @@ All eleven planned screens are implemented and connected through a single naviga
 Three pieces of work are outstanding, in priority order:
 
 \begin{enumerate}
-    \item \textbf{Google Places Nearby Search API.} Replace \texttt{RestaurantRepository}'s in-memory list with a new repository backed by a live Nearby Search call (type \texttt{restaurant}, radius 1500 metres), returning real restaurants around the user's location. Because the Map screen already depends only on the repository's interface, this screen requires no changes of its own.
+    \item \textbf{Google Places Nearby Search API.} Replace \texttt{RestaurantRepository}'s in-memory list with a new repository backed by a live Nearby Search call \citep{google_places} (type \texttt{restaurant}, radius 1500 metres), returning real restaurants around the user's location. Because the Map screen already depends only on the repository's interface, this screen requires no changes of its own.
     \item \textbf{Live search.} Once real restaurant data is flowing, connect the existing search bar to the Places API's keyword parameter with a short debounce, replacing the current client-side filter over the placeholder list, and show a loading indicator while a search request is in flight.
     \item \textbf{Back-press polish and formal testing.} Add a press-back-again-to-exit confirmation on the Map screen, and carry out the structured functional test plan and the participant-based usability testing (Section 6.2) that were deferred until real restaurant data is available to test against.
 \end{enumerate}
