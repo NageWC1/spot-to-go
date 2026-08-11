@@ -1,7 +1,7 @@
 # Project Progress Report
 ## Spot To Go — Android Dissertation Project
-**Date:** 6 August 2026 (originally 4 June 2026, updated each session — see dated entries below)
-**Current Phase:** Android Development — core screens, navigation, Firebase Auth, and Gemini AI search complete; direction decided to move restaurant data (Places API), reviews, and video (YouTube Data API) to fully dynamic sourcing — paused pending resolution of Gemini API student access. Final report draft now includes four new architecture/flow diagrams (see Session — 6 August 2026 below).
+**Date:** 11 August 2026 (originally 4 June 2026, updated each session — see dated entries below)
+**Current Phase:** Android Development — core screens, navigation, Firebase Auth, and Gemini AI search complete; direction decided to move restaurant data (Places API), reviews, and video (YouTube Data API) to fully dynamic sourcing — paused pending resolution of Gemini API student access. **The final report is now a complete full draft** — all sections, figures, and diagrams in place, with cover page, List of Figures, captions, and Table of Contents polished (see Session — 11 August 2026 below).
 
 ---
 
@@ -129,7 +129,7 @@
 | Phase 6 | Live Places API integration — now scoped as full dynamic pipeline (Gemini → Places search → real details/reviews → YouTube Data API video) | **PAUSED** — direction agreed and documented above, blocked on resolving Gemini API student access before implementation starts |
 | Phase 7 | Firebase Auth (login/register) | DONE — tested on physical device, map gated behind login |
 | Phase 8 | UI polish, loading indicators, error handling | IN PROGRESS — 11 screens implemented incl. bottom nav, password visibility, loading spinners |
-| Phase 9 | Final report writing | IN PROGRESS — draft submitted for supervisor feedback |
+| Phase 9 | Final report writing | FULL DRAFT COMPLETE — all sections, figures, and diagrams in place; refining presentation per supervisor feedback |
 
 ---
 
@@ -336,6 +336,32 @@
   - The roadmap diagram's node layout was ~22cm wide against a ~16cm text width, producing a 171pt overfull hbox (the figure was overflowing the page margin). Fixed by wrapping all four new `tikzpicture` environments in `\resizebox{\textwidth}{!}{...}`, so each diagram scales to the page regardless of its internal coordinate extents.
 - After both fixes: full rebuild (`pdflatex` → `bibtex` → `pdflatex` ×2) completed with **0 warnings and 0 undefined references**. Four small pre-existing overfull-hbox warnings (46pt, 5pt, 15pt, 43pt — all caption-text justification, not figures) were confirmed present in the original committed `.tex` before these changes too, by compiling the pre-change version from `git show HEAD` side by side — so they were not introduced by this work.
 - Output: `final report/Spot_To_Go_Final_Report.pdf` regenerated locally (19 pages) and committed alongside the `.tex` source.
+
+---
+
+## Session — 11 August 2026
+
+### Final Report — Now a Complete Full Draft
+
+- **Milestone:** the final report (`final report/Spot_To_Go_Final_Report.tex`) is now a complete full draft — every section, figure, and diagram is in place, and the front matter and presentation have been polished per supervisor feedback. It is no longer a partial "submitted for feedback" draft.
+
+### Git Sync
+
+- Local `main` was one commit behind `origin/main` (the earlier "revise final report per supervisor feedback" commit); fast-forwarded cleanly with no conflicts, so local and remote match before any new work.
+
+### Report Fixes & Presentation Polish
+
+- **Cross-reference bug fixed:** two in-text references sent readers to Section 6.2 (Usability Considerations) for the ethics discussion, which actually lives in Section 7.2 (Ethical Considerations). Corrected both.
+- **Cover page cleaned up:** removed the "(Draft submitted for supervisor review and feedback)" note, the "Project type" and "Platform" rows, and the "submitted in partial fulfilment…" blurb, leaving the title, "Final Project Report", and the date.
+- **List of Figures shortened:** added short optional captions (`\caption[short]{full}`) to all 11 figures so the LoF shows a single-line entry each, while the full descriptive caption still appears under the figure.
+- **Per-screenshot captions:** each of the 11 screenshots now carries its own ~15-word descriptive caption instead of a one-word label.
+- **Caption styling:** added the `caption` package with an explicit "Figure N:" label and italic caption text across all figures; the per-screenshot labels are italic too.
+- **Table of Contents:** added a dedicated "Project Schedule Gantt Chart" entry pointing at the Gantt figure.
+
+### Build Verification
+
+- Rebuilt with `latexmk` (MiKTeX) after each change; final compile completed with **0 errors and 0 undefined references** (34 pages). Verified the shortened LoF entries and the new Gantt TOC entry in the generated `.lof`/`.toc`.
+- Committed only the report `.tex` + rebuilt `.pdf`; LaTeX build artifacts were added to `.gitignore` rather than committed.
 
 ---
 

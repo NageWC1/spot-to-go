@@ -19,6 +19,10 @@
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta, shapes.geometric, positioning, calc, fit, shapes.multipart}
 
+% Caption styling: an explicit "Figure N:" label followed by italic caption text.
+\usepackage{caption}
+\captionsetup{labelsep=colon, textfont=it, labelfont=up}
+
 % hyperref is loaded last (best practice) so it can patch the other packages
 % correctly; loading it too early caused duplicate figure/page PDF anchors.
 \usepackage{hyperref}
@@ -43,7 +47,7 @@
   \begin{minipage}[t]{#1}
     \centering
     \includegraphics[width=\linewidth]{images/#2}\\[2pt]
-    {\footnotesize #3}
+    {\footnotesize\itshape #3}
   \end{minipage}%
 }
 
@@ -738,6 +742,7 @@ The work was planned against a fixed submission deadline, so the project was div
 \caption[Project schedule Gantt chart (WP1--WP7).]{Project schedule across seven work packages (WP1--WP7), from the literature review through to final report and presentation. The chart shows the planned calendar window for each package; overlaps between adjacent packages were intentional, allowing later implementation stages to begin before the previous one was fully closed.}
 \label{fig:gantt}
 \end{figure}
+\addcontentsline{toc}{subsubsection}{Project Schedule Gantt Chart}
 
 \subsection{Summary of Progress}
 
