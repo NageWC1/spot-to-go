@@ -10,3 +10,8 @@ api.txt
 *.blg
 *.out
 *.synctex.gz
+*.fls
+*.fdb_latexmk
+*.log
+*.lof
+*.toc
