@@ -59,20 +59,11 @@
     {\LARGE \textbf{Spot To Go: A Location-Based Android Application}} \\[0.6em]
     {\large \textbf{for Restaurant Discovery with Video Integration}} \\[2.5em]
 
-    {\large Final Project Report} \\[0.4em]
-    {\normalsize (Draft submitted for supervisor review and feedback)} \\[3em]
+    {\large Final Project Report} \\[3em]
 
-    \begin{tabular}{rl}
-        \textbf{Project type:} & Undergraduate final-year project \\[0.4em]
-        \textbf{Platform:}     & Android (Kotlin, Jetpack Compose) \\[0.4em]
-        \textbf{Date:}         & August 2026 \\
-    \end{tabular}
+    {\large August 2026} \\[2em]
 
     \vfill
-
-    {\normalsize A report submitted in partial fulfilment of the requirements} \\
-    {\normalsize for the degree programme, describing the design, implementation,} \\
-    {\normalsize and current progress of the Spot To Go application.} \\[2em]
 \end{center}
 \clearpage
 
@@ -196,7 +187,7 @@ Figure~\ref{fig:prototype} shows the original hand-drawn prototype that the scre
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.92\textwidth]{images/prototype.jpeg}
-    \caption{Original hand-drawn prototype of the Spot To Go application, showing the planned flow across login, home search, the map with restaurant markers, restaurant detail, video playback, and directions. This layout directly informed the screen set described above.}
+    \caption[Original hand-drawn prototype of the application.]{Original hand-drawn prototype of the Spot To Go application, showing the planned flow across login, home search, the map with restaurant markers, restaurant detail, video playback, and directions. This layout directly informed the screen set described above.}
     \label{fig:prototype}
 \end{figure}
 
@@ -251,7 +242,7 @@ Figure~\ref{fig:navmap} traces the same eleven screens as an explicit navigation
 
 \end{tikzpicture}%
 }
-\caption{Screen navigation map for Spot To Go. Gray nodes are the authentication screens, blue nodes are the core discovery flow, and yellow nodes are secondary screens reached from Home. The Map-to-Home bottom navigation link was added in response to a usability issue found during testing (Section 6.1).}
+\caption[Screen navigation map for Spot To Go.]{Screen navigation map for Spot To Go. Gray nodes are the authentication screens, blue nodes are the core discovery flow, and yellow nodes are secondary screens reached from Home. The Map-to-Home bottom navigation link was added in response to a usability issue found during testing (Section 6.1).}
 \label{fig:navmap}
 \end{figure}
 
@@ -324,7 +315,7 @@ Before describing how the system is built, it is worth stating precisely what it
 
 \end{tikzpicture}%
 }
-\caption{UML use case diagram for Spot To Go. The User is the single primary actor; Firebase, the Google Maps platform, and YouTube/TikTok are secondary actors the system relies on. Viewing details \emph{includes} viewing the map, and watching a video or getting directions \emph{extend} the detail use case as optional follow-on actions.}
+\caption[UML use case diagram for Spot To Go.]{UML use case diagram for Spot To Go. The User is the single primary actor; Firebase, the Google Maps platform, and YouTube/TikTok are secondary actors the system relies on. Viewing details \emph{includes} viewing the map, and watching a video or getting directions \emph{extend} the detail use case as optional follow-on actions.}
 \label{fig:usecase}
 \end{figure}
 
@@ -413,7 +404,7 @@ Figure~\ref{fig:classdiagram} expresses the same system as a UML class diagram, 
 
 \end{tikzpicture}%
 }
-\caption{UML class diagram of the core Spot To Go classes. Screens are hosted by \texttt{MainActivity} and depend on the \texttt{RestaurantRepository} interface and the \texttt{Restaurant} data type, never on the underlying data source --- the property that lets the Places API integration in Section~8 attach without changing any screen.}
+\caption[UML class diagram of the core classes.]{UML class diagram of the core Spot To Go classes. Screens are hosted by \texttt{MainActivity} and depend on the \texttt{RestaurantRepository} interface and the \texttt{Restaurant} data type, never on the underlying data source --- the property that lets the Places API integration in Section~8 attach without changing any screen.}
 \label{fig:classdiagram}
 \end{figure}
 
@@ -473,7 +464,7 @@ Figure~\ref{fig:arch} shows the application in four layers rather than as a sequ
 
 \end{tikzpicture}%
 }
-\caption{Layered software architecture of Spot To Go. Screens depend only on the repository interfaces in the layer below; \texttt{RestaurantRepository} currently returns an in-memory list, and the dashed box shows where the planned Google Places API client will attach without requiring any change above the repository layer.}
+\caption[Layered software architecture of Spot To Go.]{Layered software architecture of Spot To Go. Screens depend only on the repository interfaces in the layer below; \texttt{RestaurantRepository} currently returns an in-memory list, and the dashed box shows where the planned Google Places API client will attach without requiring any change above the repository layer.}
 \label{fig:arch}
 \end{figure}
 
@@ -526,7 +517,7 @@ Figure~\ref{fig:dfd} shows the data flow through the application as it is curren
 \draw[->] (dir.south)   -- node[lbl, right]{ACTION\_VIEW intent} (gmaps.north);
 
 \end{tikzpicture}
-\caption{Current data flow through Spot To Go. The in-memory restaurant store is a temporary stand-in for the planned Google Places API integration described in Section 8.}
+\caption[Data flow through the current implementation.]{Current data flow through Spot To Go. The in-memory restaurant store is a temporary stand-in for the planned Google Places API integration described in Section 8.}
 \label{fig:dfd}
 \end{figure}
 
@@ -593,7 +584,7 @@ Where the data flow diagram in Figure~\ref{fig:dfd} shows \emph{what} data moves
 
 \end{tikzpicture}%
 }
-\caption{Application flowchart showing the runtime control flow of Spot To Go in standard notation: rounded terminators for entry and exit points, rectangles for processing steps, and diamonds for decisions. The two decision points --- session validity and location permission --- are the conditions that determine which path a user takes through the app.}
+\caption[Application flowchart of the runtime control flow.]{Application flowchart showing the runtime control flow of Spot To Go in standard notation: rounded terminators for entry and exit points, rectangles for processing steps, and diamonds for decisions. The two decision points --- session validity and location permission --- are the conditions that determine which path a user takes through the app.}
 \label{fig:flowchart}
 \end{figure}
 
@@ -606,21 +597,21 @@ Figure~\ref{fig:screens} shows all eleven implemented screens. Every screen is b
 
 \begin{figure}[H]
 \centering
-\shot{0.15\textwidth}{splash screen.jpeg}{Splash}
-\hfill\shot{0.15\textwidth}{home page.jpeg}{Home}
-\hfill\shot{0.15\textwidth}{login page.jpeg}{Login}
-\hfill\shot{0.15\textwidth}{registration page.jpeg}{Register}
-\hfill\shot{0.15\textwidth}{map page.jpeg}{Map}
-\hfill\shot{0.15\textwidth}{hotel review page.jpeg}{Detail}
+\shot{0.15\textwidth}{splash screen.jpeg}{Splash screen shown briefly on launch while the app loads and checks for a session.}
+\hfill\shot{0.15\textwidth}{home page.jpeg}{Home screen with the keyword search bar and the Explore Nearby button leading to the map.}
+\hfill\shot{0.15\textwidth}{login page.jpeg}{Login screen where an existing user signs in with email and password through Firebase Authentication.}
+\hfill\shot{0.15\textwidth}{registration page.jpeg}{Registration screen creating a new Firebase account from an email, password, and display name.}
+\hfill\shot{0.15\textwidth}{map page.jpeg}{Map centred on the user's real GPS location, showing nearby restaurants as tappable markers.}
+\hfill\shot{0.15\textwidth}{hotel review page.jpeg}{Restaurant detail screen showing name, rating, distance, address, and description with action buttons.}
 
 \vspace{4mm}
 
-\shot{0.18\textwidth}{watch video page.jpeg}{Video}
-\hfill\shot{0.18\textwidth}{tiktok launch page.jpeg}{TikTok Link}
-\hfill\shot{0.18\textwidth}{direction screen.jpeg}{Directions}
-\hfill\shot{0.18\textwidth}{contact us page.jpeg}{Contact Us}
-\hfill\shot{0.18\textwidth}{privacy page.jpeg}{Privacy Policy}
-\caption{All eleven implemented screens, matching the flow shown in Figure~\ref{fig:prototype}.}
+\shot{0.18\textwidth}{watch video page.jpeg}{Video screen that opens a real YouTube preview of the restaurant through an Android intent.}
+\hfill\shot{0.18\textwidth}{tiktok launch page.jpeg}{TikTok link screen, styled like a post, opening a TikTok search for the restaurant.}
+\hfill\shot{0.18\textwidth}{direction screen.jpeg}{Directions screen offering car, bus, and walk modes before launching Google Maps navigation.}
+\hfill\shot{0.18\textwidth}{contact us page.jpeg}{Contact Us screen giving users a simple channel to reach the developers of the app.}
+\hfill\shot{0.18\textwidth}{privacy page.jpeg}{Privacy Policy screen summarising how location data and account details are used and stored.}
+\caption[The eleven implemented screens.]{All eleven implemented screens, matching the flow shown in Figure~\ref{fig:prototype}.}
 \label{fig:screens}
 \end{figure}
 
@@ -678,7 +669,7 @@ Figure~\ref{fig:authseq} sets out that tested flow as a sequence diagram, showin
 
 \end{tikzpicture}%
 }
-\caption{Sequence diagram of the tested authentication flow, from account registration through to the Map screen's own session check. \texttt{AuthRepository} is the only component that talks to Firebase directly; the Map screen re-checks \texttt{isLoggedIn} independently so it can never be reached without a valid session, regardless of how it was navigated to.}
+\caption[Sequence diagram of the authentication flow.]{Sequence diagram of the tested authentication flow, from account registration through to the Map screen's own session check. \texttt{AuthRepository} is the only component that talks to Firebase directly; the Map screen re-checks \texttt{isLoggedIn} independently so it can never be reached without a valid session, regardless of how it was navigated to.}
 \label{fig:authseq}
 \end{figure}
 
@@ -744,7 +735,7 @@ The work was planned against a fixed submission deadline, so the project was div
 \begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{images/gant chart.png}
-\caption{Project schedule across seven work packages (WP1--WP7), from the literature review through to final report and presentation. The chart shows the planned calendar window for each package; overlaps between adjacent packages were intentional, allowing later implementation stages to begin before the previous one was fully closed.}
+\caption[Project schedule Gantt chart (WP1--WP7).]{Project schedule across seven work packages (WP1--WP7), from the literature review through to final report and presentation. The chart shows the planned calendar window for each package; overlaps between adjacent packages were intentional, allowing later implementation stages to begin before the previous one was fully closed.}
 \label{fig:gantt}
 \end{figure}
 
@@ -793,7 +784,7 @@ Figure~\ref{fig:roadmap} sets out the same three items as a dependency chain rat
 
 \end{tikzpicture}%
 }
-\caption{Remaining work as a dependency chain rather than a dated roadmap. The Places API integration (Section 8, item 1) blocks live search (item 2); formal back-press and usability testing (item 3) does not depend on either and could run in parallel.}
+\caption[Remaining work as a dependency chain.]{Remaining work as a dependency chain rather than a dated roadmap. The Places API integration (Section 8, item 1) blocks live search (item 2); formal back-press and usability testing (item 3) does not depend on either and could run in parallel.}
 \label{fig:roadmap}
 \end{figure}
 
