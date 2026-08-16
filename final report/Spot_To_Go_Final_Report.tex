@@ -18,6 +18,7 @@
 \usepackage{float}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta, shapes.geometric, positioning, calc, fit, shapes.multipart}
+\usepackage{pgfgantt}
 
 % Caption styling: an explicit "Figure N:" label followed by italic caption text.
 \usepackage{caption}
@@ -46,8 +47,23 @@
 \newcommand{\shot}[3]{%
   \begin{minipage}[t]{#1}
     \centering
+    \singlespacing
     \includegraphics[width=\linewidth]{images/#2}\\[2pt]
     {\footnotesize\itshape #3}
+  \end{minipage}%
+}
+
+% Inline "press this button, land on the next screen" arrow used between
+% screenshots in Figure~\ref{fig:screens}. #1 = vertical offset so the arrow
+% sits level with the middle of the adjacent screenshot, #2 = column width,
+% #3 = the button/link label that triggers the transition.
+\newcommand{\flowarrow}[3]{%
+  \begin{minipage}[t]{#2}
+    \centering
+    \singlespacing
+    \vspace{#1}
+    {\Huge$\rightarrow$}\\[1pt]
+    {\tiny\itshape #3}
   \end{minipage}%
 }
 
@@ -75,7 +91,7 @@
 % --- Abstract ---
 \begin{abstract}
 \noindent
-Choosing where to eat is still driven largely by star ratings and short text reviews, neither of which conveys the atmosphere, food presentation, or overall experience of a place particularly well. This report presents \textbf{Spot To Go}, an Android application that pairs a live, location-aware map of nearby restaurants with a direct link to a real short-form video of each one, so that a user can form a more grounded impression before deciding where to go. The application is built in Kotlin using Jetpack Compose and Navigation Compose, draws the user's position from the Fused Location Provider, renders restaurants on the Google Maps SDK, and gates the experience behind live Firebase Authentication. Video previews and turn-by-turn directions are delegated to the platform apps the user already trusts through Android intents. This document restates the project aim and objectives with their current status, revisits and updates the related literature, presents the system design using UML and flowchart notation, describes the implemented screens, and evaluates the work carried out so far. Eleven screens are fully implemented and connected, authentication has been tested end-to-end on a physical device, and the remaining work --- principally replacing the placeholder restaurant data with a live Google Places API integration --- is scoped and scheduled. The report closes with a project schedule and a clear statement of how the work will be taken forward to completion.
+Choosing where to eat is still driven largely by star ratings and short text reviews, neither of which conveys the atmosphere, food presentation, or overall experience of a place particularly well. This report presents \textbf{Spot To Go}, an Android application that pairs a live, location-aware map of nearby restaurants with a direct link to a real short-form video of each one, giving a more grounded impression before deciding where to go. The application is built in Kotlin using Jetpack Compose and Navigation Compose, draws the user's position from the Fused Location Provider, renders restaurants on the Google Maps SDK, and gates the experience behind live Firebase Authentication; video previews and directions are delegated to the platform apps the user already trusts through Android intents. This document restates the project aim and objectives, revisits the related literature, presents the system design, and evaluates the implementation and testing carried out so far. Eleven screens are fully implemented and connected, and authentication has been tested end-to-end on a physical device. The remaining work, principally a live Google Places API integration, is scoped and scheduled, and the report closes with the project timeline for completing it.
 \end{abstract}
 
 % ============================================================
@@ -91,11 +107,17 @@ I would also like to thank my family and friends for their patience and encourag
 Finally, I acknowledge the developer tools and platform services --- Android Studio, the Google Maps and Places platforms, and Firebase --- that provided the foundation on which this application was built.
 
 % ============================================================
+% --- Statement of AI Usage ---
+\newpage
+\section*{Statement of AI Usage}
+\addcontentsline{toc}{section}{Statement of AI Usage}
+
+AI tools were used in a supporting capacity during this project, for research, brainstorming, and structuring ideas, for example exploring possible technical approaches, organising this report's section structure, and reviewing drafts against supervisor feedback. All final written content was reviewed and rewritten by me, and I take full responsibility for it. Separately, and distinct from how this report was produced, the Google Gemini API is used as a live technical component inside the Spot To Go application itself: it powers the app's natural-language, ``agentic'' search bar, interpreting a user's free-text query into structured search filters at runtime. This is a deliberate architectural and design choice for the software being submitted, not AI assistance in writing this document.
+
+% ============================================================
 % --- Front matter listings ---
 \newpage
 \tableofcontents
-\newpage
-\listoffigures
 \clearpage
 
 % --- Body starts here; restart page numbering at 1 ---
@@ -191,7 +213,7 @@ Figure~\ref{fig:prototype} shows the original hand-drawn prototype that the scre
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.92\textwidth]{images/prototype.jpeg}
-    \caption[Original hand-drawn prototype of the application.]{Original hand-drawn prototype of the Spot To Go application, showing the planned flow across login, home search, the map with restaurant markers, restaurant detail, video playback, and directions. This layout directly informed the screen set described above.}
+    \caption[Original hand-drawn prototype of the application.]{Hand-drawn prototype showing the planned screen flow: login, map, detail, and video.}
     \label{fig:prototype}
 \end{figure}
 
@@ -246,7 +268,7 @@ Figure~\ref{fig:navmap} traces the same eleven screens as an explicit navigation
 
 \end{tikzpicture}%
 }
-\caption[Screen navigation map for Spot To Go.]{Screen navigation map for Spot To Go. Gray nodes are the authentication screens, blue nodes are the core discovery flow, and yellow nodes are secondary screens reached from Home. The Map-to-Home bottom navigation link was added in response to a usability issue found during testing (Section 6.1).}
+\caption[Screen navigation map for Spot To Go.]{Screen navigation map: authentication (grey), core discovery (blue), and secondary screens (yellow).}
 \label{fig:navmap}
 \end{figure}
 
@@ -319,7 +341,7 @@ Before describing how the system is built, it is worth stating precisely what it
 
 \end{tikzpicture}%
 }
-\caption[UML use case diagram for Spot To Go.]{UML use case diagram for Spot To Go. The User is the single primary actor; Firebase, the Google Maps platform, and YouTube/TikTok are secondary actors the system relies on. Viewing details \emph{includes} viewing the map, and watching a video or getting directions \emph{extend} the detail use case as optional follow-on actions.}
+\caption[UML use case diagram for Spot To Go.]{UML use case diagram: the User as primary actor, with Firebase, Maps, and YouTube/TikTok as secondary actors.}
 \label{fig:usecase}
 \end{figure}
 
@@ -408,7 +430,7 @@ Figure~\ref{fig:classdiagram} expresses the same system as a UML class diagram, 
 
 \end{tikzpicture}%
 }
-\caption[UML class diagram of the core classes.]{UML class diagram of the core Spot To Go classes. Screens are hosted by \texttt{MainActivity} and depend on the \texttt{RestaurantRepository} interface and the \texttt{Restaurant} data type, never on the underlying data source --- the property that lets the Places API integration in Section~8 attach without changing any screen.}
+\caption[UML class diagram of the core classes.]{UML class diagram: screens depend on the \texttt{RestaurantRepository} interface, never the underlying data source.}
 \label{fig:classdiagram}
 \end{figure}
 
@@ -468,7 +490,7 @@ Figure~\ref{fig:arch} shows the application in four layers rather than as a sequ
 
 \end{tikzpicture}%
 }
-\caption[Layered software architecture of Spot To Go.]{Layered software architecture of Spot To Go. Screens depend only on the repository interfaces in the layer below; \texttt{RestaurantRepository} currently returns an in-memory list, and the dashed box shows where the planned Google Places API client will attach without requiring any change above the repository layer.}
+\caption[Layered software architecture of Spot To Go.]{Layered software architecture; the dashed box shows where the planned Places API client attaches.}
 \label{fig:arch}
 \end{figure}
 
@@ -521,7 +543,7 @@ Figure~\ref{fig:dfd} shows the data flow through the application as it is curren
 \draw[->] (dir.south)   -- node[lbl, right]{ACTION\_VIEW intent} (gmaps.north);
 
 \end{tikzpicture}
-\caption[Data flow through the current implementation.]{Current data flow through Spot To Go. The in-memory restaurant store is a temporary stand-in for the planned Google Places API integration described in Section 8.}
+\caption[Data flow through the current implementation.]{Current data flow; the in-memory restaurant store stands in for the planned Places API.}
 \label{fig:dfd}
 \end{figure}
 
@@ -588,7 +610,7 @@ Where the data flow diagram in Figure~\ref{fig:dfd} shows \emph{what} data moves
 
 \end{tikzpicture}%
 }
-\caption[Application flowchart of the runtime control flow.]{Application flowchart showing the runtime control flow of Spot To Go in standard notation: rounded terminators for entry and exit points, rectangles for processing steps, and diamonds for decisions. The two decision points --- session validity and location permission --- are the conditions that determine which path a user takes through the app.}
+\caption[Application flowchart of the runtime control flow.]{Application flowchart in standard notation, with decision points for session validity and location permission.}
 \label{fig:flowchart}
 \end{figure}
 
@@ -597,25 +619,30 @@ Where the data flow diagram in Figure~\ref{fig:dfd} shows \emph{what} data moves
 
 \subsection{Screens}
 
-Figure~\ref{fig:screens} shows all eleven implemented screens. Every screen is built as a Jetpack Compose function using Material 3 components, styled with a single Deep Orange (\texttt{\#FF5722}) theme applied consistently across the app.
+Figure~\ref{fig:screens} shows all eleven implemented screens, arranged in the order a user actually reaches them rather than a plain grid. Arrows are labelled with the specific button or link that fires the transition; screens reached by a route that does not fit the row (the branches off Login and Home) instead carry a ``Reached from...'' note in their own caption, naming the screen and control that leads to them. Every screen is built as a Jetpack Compose function using Material 3 components, styled with a single Deep Orange (\texttt{\#FF5722}) theme applied consistently across the app.
 
 \begin{figure}[H]
 \centering
-\shot{0.15\textwidth}{splash screen.jpeg}{Splash screen shown briefly on launch while the app loads and checks for a session.}
-\hfill\shot{0.15\textwidth}{home page.jpeg}{Home screen with the keyword search bar and the Explore Nearby button leading to the map.}
-\hfill\shot{0.15\textwidth}{login page.jpeg}{Login screen where an existing user signs in with email and password through Firebase Authentication.}
-\hfill\shot{0.15\textwidth}{registration page.jpeg}{Registration screen creating a new Firebase account from an email, password, and display name.}
-\hfill\shot{0.15\textwidth}{map page.jpeg}{Map centred on the user's real GPS location, showing nearby restaurants as tappable markers.}
-\hfill\shot{0.15\textwidth}{hotel review page.jpeg}{Restaurant detail screen showing name, rating, distance, address, and description with action buttons.}
+\shot{2.2cm}{splash screen.jpeg}{Splash screen shown briefly on launch while the app loads and checks for a session.}
+\hfill\flowarrow{2.3cm}{1.0cm}{auto, after load}
+\hfill\shot{2.2cm}{login page.jpeg}{Login screen where an existing user signs in with email and password through Firebase Authentication.}
+\hfill\flowarrow{2.3cm}{1.0cm}{Login button}
+\hfill\shot{2.2cm}{home page.jpeg}{Home screen with the keyword search bar and the Explore Nearby button leading to the map.}
+\hfill\flowarrow{2.3cm}{1.0cm}{Explore Nearby}
+\hfill\shot{2.2cm}{map page.jpeg}{Map centred on the user's real GPS location, showing nearby restaurants as tappable markers.}
+\hfill\flowarrow{2.3cm}{1.0cm}{tap marker}
+\hfill\shot{2.2cm}{hotel review page.jpeg}{Restaurant detail screen showing name, rating, distance, address, and description with action buttons.}
 
 \vspace{4mm}
 
-\shot{0.18\textwidth}{watch video page.jpeg}{Video screen that opens a real YouTube preview of the restaurant through an Android intent.}
-\hfill\shot{0.18\textwidth}{tiktok launch page.jpeg}{TikTok link screen, styled like a post, opening a TikTok search for the restaurant.}
-\hfill\shot{0.18\textwidth}{direction screen.jpeg}{Directions screen offering car, bus, and walk modes before launching Google Maps navigation.}
-\hfill\shot{0.18\textwidth}{contact us page.jpeg}{Contact Us screen giving users a simple channel to reach the developers of the app.}
-\hfill\shot{0.18\textwidth}{privacy page.jpeg}{Privacy Policy screen summarising how location data and account details are used and stored.}
-\caption[The eleven implemented screens.]{All eleven implemented screens, matching the flow shown in Figure~\ref{fig:prototype}.}
+\shot{2.1cm}{registration page.jpeg}{Registration screen creating a new Firebase account from an email, password, and display name. (From Login: ``Register'' link.)}
+\hfill\shot{2.1cm}{watch video page.jpeg}{Video screen that opens a real YouTube preview of the restaurant through an Android intent. (From Detail: ``Watch Video''.)}
+\hfill\flowarrow{2.1cm}{1.0cm}{TikTok search}
+\hfill\shot{2.1cm}{tiktok launch page.jpeg}{TikTok link screen, styled like a post, opening a TikTok search for the restaurant.}
+\hfill\shot{2.1cm}{direction screen.jpeg}{Directions screen offering car, bus, and walk modes before launching Google Maps navigation. (From Detail: ``Get Directions''.)}
+\hfill\shot{2.1cm}{contact us page.jpeg}{Contact Us screen giving users a simple channel to reach the developers of the app. (From Home: bottom nav.)}
+\hfill\shot{2.1cm}{privacy page.jpeg}{Privacy Policy screen summarising how location data and account details are used and stored. (From Home: bottom nav.)}
+\caption[The eleven implemented screens, with navigation arrows.]{All eleven implemented screens, with arrows labelled by the button that triggers each transition.}
 \label{fig:screens}
 \end{figure}
 
@@ -673,7 +700,7 @@ Figure~\ref{fig:authseq} sets out that tested flow as a sequence diagram, showin
 
 \end{tikzpicture}%
 }
-\caption[Sequence diagram of the authentication flow.]{Sequence diagram of the tested authentication flow, from account registration through to the Map screen's own session check. \texttt{AuthRepository} is the only component that talks to Firebase directly; the Map screen re-checks \texttt{isLoggedIn} independently so it can never be reached without a valid session, regardless of how it was navigated to.}
+\caption[Sequence diagram of the authentication flow.]{Sequence diagram of the tested authentication flow, from registration to the Map screen's session check.}
 \label{fig:authseq}
 \end{figure}
 
@@ -734,12 +761,62 @@ In practice, the risk this introduces is small and well-managed. Firebase Authen
 
 \subsection{Project Schedule}
 
-The work was planned against a fixed submission deadline, so the project was divided into seven sequential work packages and scheduled across the available months rather than left open-ended. Figure~\ref{fig:gantt} presents this plan as a Gantt chart, with each work package (WP1--WP7) mapped to a calendar window from April to September 2026. The packages were deliberately allowed to overlap where a later stage could begin before the previous one was fully closed --- for example, screen implementation (WP3--WP5) was staged so that mapping, detail/video, and search work could run into one another rather than waiting for a clean handover --- which kept progress continuous instead of stalling at package boundaries. As of the date of this draft, WP1 through WP5 are complete and WP6 (Testing and Writing) is in progress; the finer-grained dependency view of the tasks that remain within these final packages is given separately in Figure~\ref{fig:roadmap}.
+The work was planned against a fixed submission deadline, so the project was divided into seven sequential work packages and scheduled across the available months rather than left open-ended. Figure~\ref{fig:gantt} presents this plan as a Gantt chart, with each work package (WP1--WP7) broken down into its constituent subtasks and mapped to a calendar window from April to September 2026. The packages were deliberately allowed to overlap where a later stage could begin before the previous one was fully closed --- for example, screen implementation (WP3--WP5) was staged so that mapping, detail/video, and search work could run into one another rather than waiting for a clean handover --- which kept progress continuous instead of stalling at package boundaries. As of the date of this draft, WP1 through WP5 are complete and WP6 (Testing and Writing) is in progress; the finer-grained dependency view of the tasks that remain within these final packages is given separately in Figure~\ref{fig:roadmap}.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{images/gant chart.png}
-\caption[Project schedule Gantt chart (WP1--WP7).]{Project schedule across seven work packages (WP1--WP7), from the literature review through to final report and presentation. The chart shows the planned calendar window for each package; overlaps between adjacent packages were intentional, allowing later implementation stages to begin before the previous one was fully closed.}
+\resizebox{\textwidth}{!}{%
+\begin{ganttchart}[
+    vgrid, hgrid,
+    x unit=0.6cm,
+    y unit chart=0.45cm,
+    y unit title=0.6cm,
+    bar height=0.6,
+    group height=0.6,
+    bar/.append style={fill=orange!70!black},
+    group/.append style={fill=blue!30, draw=blue!60!black},
+    bar label font=\scriptsize,
+    group label font=\bfseries\scriptsize,
+    title label font=\bfseries\scriptsize
+]{1}{20}
+\gantttitle{Apr}{1}
+\gantttitle{May}{5}
+\gantttitle{Jun}{5}
+\gantttitle{Jul}{4}
+\gantttitle{Aug}{4}
+\gantttitle{Sep}{1} \\
+\gantttitlelist{1,...,20}{1} \\
+\ganttgroup{WP1: Literature Review}{1}{4} \\
+\ganttbar{Requirements \& background analysis}{1}{2} \\
+\ganttbar{Literature review (4 areas)}{1}{3} \\
+\ganttbar{Proposal writing \& submission}{3}{4} \\
+\ganttgroup{WP2: Setup \& Architecture}{2}{5} \\
+\ganttbar{Android Studio project scaffold}{2}{3} \\
+\ganttbar{Dependency \& Gradle configuration}{3}{4} \\
+\ganttbar{API keys \& Cloud Console setup}{3}{5} \\
+\ganttgroup{WP3: Maps \& Location}{5}{11} \\
+\ganttbar{Google Map integration \& GPS centring}{5}{7} \\
+\ganttbar{Restaurant markers (seed data)}{6}{8} \\
+\ganttbar{Location permission handling}{7}{8} \\
+\ganttbar{Firebase Authentication (login/register)}{8}{11} \\
+\ganttgroup{WP4: Detail \& Video}{10}{14} \\
+\ganttbar{Restaurant detail screen}{10}{11} \\
+\ganttbar{Video screen \& YouTube intent}{11}{12} \\
+\ganttbar{Directions screen \& Maps intent}{12}{14} \\
+\ganttgroup{WP5: Search \& UI Polish}{13}{16} \\
+\ganttbar{Keyword search bar}{13}{14} \\
+\ganttbar{Gemini AI natural-language search}{14}{15} \\
+\ganttbar{Bottom navigation \& UI fixes}{15}{16} \\
+\ganttgroup{WP6: Testing \& Writing}{14}{19} \\
+\ganttbar{Manual functional testing \& bug fixes}{14}{17} \\
+\ganttbar{Usability heuristic review}{16}{17} \\
+\ganttbar{Final report writing}{15}{19} \\
+\ganttgroup{WP7: Report \& Presentation}{19}{20} \\
+\ganttbar{Report review \& polish}{19}{20} \\
+\ganttbar{Presentation preparation}{19}{20}
+\end{ganttchart}%
+}
+\caption[Project schedule Gantt chart (WP1--WP7).]{Project schedule Gantt chart across seven work packages (WP1--WP7) and their subtasks.}
 \label{fig:gantt}
 \end{figure}
 \addcontentsline{toc}{subsubsection}{Project Schedule Gantt Chart}
@@ -789,7 +866,7 @@ Figure~\ref{fig:roadmap} sets out the same three items as a dependency chain rat
 
 \end{tikzpicture}%
 }
-\caption[Remaining work as a dependency chain.]{Remaining work as a dependency chain rather than a dated roadmap. The Places API integration (Section 8, item 1) blocks live search (item 2); formal back-press and usability testing (item 3) does not depend on either and could run in parallel.}
+\caption[Remaining work as a dependency chain.]{Remaining work as a dependency chain: Places API blocks live search; testing runs in parallel.}
 \label{fig:roadmap}
 \end{figure}
 
