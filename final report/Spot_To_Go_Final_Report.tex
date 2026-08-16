@@ -761,7 +761,7 @@ In practice, the risk this introduces is small and well-managed. Firebase Authen
 
 \subsection{Project Schedule}
 
-The work was planned against a fixed submission deadline, so the project was divided into seven sequential work packages and scheduled across the available months rather than left open-ended. Figure~\ref{fig:gantt} presents this plan as a Gantt chart, with each work package (WP1--WP7) broken down into its constituent subtasks and mapped to a calendar window from April to September 2026. The packages were deliberately allowed to overlap where a later stage could begin before the previous one was fully closed --- for example, screen implementation (WP3--WP5) was staged so that mapping, detail/video, and search work could run into one another rather than waiting for a clean handover --- which kept progress continuous instead of stalling at package boundaries. As of the date of this draft, WP1 through WP5 are complete and WP6 (Testing and Writing) is in progress; the finer-grained dependency view of the tasks that remain within these final packages is given separately in Figure~\ref{fig:roadmap}.
+The work was planned against a fixed submission deadline, so the project was divided into seven sequential work packages and scheduled across the available months rather than left open-ended. Figure~\ref{fig:gantt} presents this plan as a Gantt chart, with each work package (WP1--WP7) broken down into its constituent subtasks and mapped to a calendar window from April to mid-August 2026, the project's submission deadline. The packages were deliberately allowed to overlap where a later stage could begin before the previous one was fully closed --- for example, screen implementation (WP3--WP5) was staged so that mapping, detail/video, and search work could run into one another rather than waiting for a clean handover --- which kept progress continuous instead of stalling at package boundaries. As of the date of this draft, WP1 through WP5 are complete and WP6 (Testing and Writing) is in progress; the finer-grained dependency view of the tasks that remain within these final packages is given separately in Figure~\ref{fig:roadmap}.
 
 \begin{figure}[H]
 \centering
@@ -778,14 +778,13 @@ The work was planned against a fixed submission deadline, so the project was div
     bar label font=\scriptsize,
     group label font=\bfseries\scriptsize,
     title label font=\bfseries\scriptsize
-]{1}{20}
+]{1}{17}
 \gantttitle{Apr}{1}
 \gantttitle{May}{5}
 \gantttitle{Jun}{5}
 \gantttitle{Jul}{4}
-\gantttitle{Aug}{4}
-\gantttitle{Sep}{1} \\
-\gantttitlelist{1,...,20}{1} \\
+\gantttitle{Aug}{2} \\
+\gantttitlelist{1,...,17}{1} \\
 \ganttgroup{WP1: Literature Review}{1}{4} \\
 \ganttbar{Requirements \& background analysis}{1}{2} \\
 \ganttbar{Literature review (4 areas)}{1}{3} \\
@@ -794,26 +793,26 @@ The work was planned against a fixed submission deadline, so the project was div
 \ganttbar{Android Studio project scaffold}{2}{3} \\
 \ganttbar{Dependency \& Gradle configuration}{3}{4} \\
 \ganttbar{API keys \& Cloud Console setup}{3}{5} \\
-\ganttgroup{WP3: Maps \& Location}{5}{11} \\
+\ganttgroup{WP3: Maps \& Location}{5}{10} \\
 \ganttbar{Google Map integration \& GPS centring}{5}{7} \\
 \ganttbar{Restaurant markers (seed data)}{6}{8} \\
 \ganttbar{Location permission handling}{7}{8} \\
-\ganttbar{Firebase Authentication (login/register)}{8}{11} \\
-\ganttgroup{WP4: Detail \& Video}{10}{14} \\
-\ganttbar{Restaurant detail screen}{10}{11} \\
-\ganttbar{Video screen \& YouTube intent}{11}{12} \\
-\ganttbar{Directions screen \& Maps intent}{12}{14} \\
-\ganttgroup{WP5: Search \& UI Polish}{13}{16} \\
-\ganttbar{Keyword search bar}{13}{14} \\
-\ganttbar{Gemini AI natural-language search}{14}{15} \\
-\ganttbar{Bottom navigation \& UI fixes}{15}{16} \\
-\ganttgroup{WP6: Testing \& Writing}{14}{19} \\
-\ganttbar{Manual functional testing \& bug fixes}{14}{17} \\
-\ganttbar{Usability heuristic review}{16}{17} \\
-\ganttbar{Final report writing}{15}{19} \\
-\ganttgroup{WP7: Report \& Presentation}{19}{20} \\
-\ganttbar{Report review \& polish}{19}{20} \\
-\ganttbar{Presentation preparation}{19}{20}
+\ganttbar{Firebase Authentication (login/register)}{8}{10} \\
+\ganttgroup{WP4: Detail \& Video}{9}{12} \\
+\ganttbar{Restaurant detail screen}{9}{10} \\
+\ganttbar{Video screen \& YouTube intent}{10}{11} \\
+\ganttbar{Directions screen \& Maps intent}{11}{12} \\
+\ganttgroup{WP5: Search \& UI Polish}{11}{14} \\
+\ganttbar{Keyword search bar}{11}{12} \\
+\ganttbar{Gemini AI natural-language search}{12}{13} \\
+\ganttbar{Bottom navigation \& UI fixes}{13}{14} \\
+\ganttgroup{WP6: Testing \& Writing}{13}{16} \\
+\ganttbar{Manual functional testing \& bug fixes}{13}{15} \\
+\ganttbar{Usability heuristic review}{14}{15} \\
+\ganttbar{Final report writing}{14}{16} \\
+\ganttgroup{WP7: Report \& Presentation}{16}{17} \\
+\ganttbar{Report review \& polish}{16}{17} \\
+\ganttbar{Presentation preparation}{16}{17}
 \end{ganttchart}%
 }
 \caption[Project schedule Gantt chart (WP1--WP7).]{Project schedule Gantt chart across seven work packages (WP1--WP7) and their subtasks.}
