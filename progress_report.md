@@ -453,6 +453,29 @@
 
 ---
 
+## Session — 18 August 2026
+
+### Git Sync
+
+- Local `main` was 6 commits behind `origin/main` (report regeneration and final-presentation work pushed from another session). Checked the incoming commits didn't touch the same paths as three untracked local LaTeX build files (`.lof`/`.log`/`.toc`) before pulling, then fast-forwarded cleanly with no conflicts. The pull's own `.gitignore` update happened to add those exact three extensions, so the untracked files dropped out of `git status` on their own afterwards.
+
+### Word Report — Cover Page Added, Global Formatting Fixed
+
+- **Trigger:** the project owner placed the university's `report template.docx` in `final report/` and pointed out that `Spot_To_Go_Final_Report.docx` (regenerated from `Spot_To_Go_Final_Report_docxsrc.tex` on 17 August) was structurally mismatched against it, and specifically that the Word version had no cover page at all.
+- Inspected both files with `python-docx`: confirmed the docx opens straight on the Abstract with no title page, and confirmed the whole document is pure pandoc style-driven output — no direct run-level font/color overrides anywhere in the body — which meant every formatting fix could be made once at the paragraph-style level (`styles.xml`) rather than run-by-run across 140+ paragraphs and two tables.
+- **Formatting fixed to the project owner's spec**, set on the `Normal` style so it cascades automatically to `Body Text`, `First Paragraph`, `Abstract`, `Bibliography`, captions, and table cells: 12pt, 1.5 line spacing, justified, black. `Heading 1`/`Heading 2` set to 14pt/13pt bold black (previously 20pt/16pt in pandoc's default theme blue, `#0F4761`). Table cell paragraphs were explicitly kept left-aligned rather than inheriting the new justify, since justified text reads badly in narrow table columns.
+- **Cover page built to match `report template.docx`'s structure**: title, name, student ID, then the template's own boilerplate line — confirmed with the project owner rather than assumed — "Dissertation report submitted for the MSc Dissertation Module, School of Computing Sciences, University of East Anglia, 2024/25", followed by a page break before the Abstract.
+- **Real bug found and fixed while building the cover page:** a stray paragraph reading "Spot To Go: A Location-Based Android Application / for Restaurant Discovery with Video Integration / Final Project Report / August 2026" was sitting as plain body text between the Abstract and the Acknowledgements heading — almost certainly the PDF's own cover-page text, dumped into the document flow by the pandoc conversion instead of becoming a real Word title page. Deleted now that an actual cover page exists in its place.
+
+### Verified PDF and Word Content Match, Word-for-Word
+
+- The project owner asked directly whether the PDF and Word files were word-for-word identical. Rather than answer from memory, extracted text from both (`python-docx` for the docx, `pdftotext -layout` for the PDF) and ran a `difflib` word-level diff instead of eyeballing it.
+- The first diff pass showed apostrophes rendering as `�` on the docx side, which looked like real text corruption at a glance. Checked the actual character codepoint directly (`0x2019`, a correct Unicode right single quotation mark) and confirmed it was only a terminal display limitation in this session's tooling, not a defect in the file — reported that distinction rather than the misleading raw diff output.
+- **Real differences confirmed:** (1) the cover page, expected since it was just rebuilt independently for Word; (2) the PDF carries a full, page-numbered Table of Contents that the Word document has never had at any point in this project's history — a genuine structural gap, separate from the formatting fixes above. Everything else — the full report body, abstract, and reference list — matched word-for-word between the two files.
+- Flagged the missing Word Table of Contents to the project owner as the next open template-mismatch item; not yet actioned.
+
+---
+
 ## Key Decisions Made (For Reference)
 
 | Decision | Choice | Reason |
