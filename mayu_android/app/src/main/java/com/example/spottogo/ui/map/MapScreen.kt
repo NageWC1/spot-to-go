@@ -1,8 +1,12 @@
 package com.example.spottogo.ui.map
 
 import android.Manifest
+import android.app.Activity
 import android.content.pm.PackageManager
+import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -15,6 +19,7 @@ import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SupportAgent
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -33,11 +38,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.example.spottogo.data.GeminiSearchService
+import com.example.spottogo.data.PlacesRepository
 import com.example.spottogo.data.Restaurant
-import com.example.spottogo.data.RestaurantRepository
+import com.example.spottogo.data.RestaurantSearch
 import com.example.spottogo.data.SearchIntent
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -53,6 +60,7 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.tasks.await
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -66,14 +74,41 @@ fun MapScreen(
     val context = LocalContext.current
     val locationPermission = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
 
-    var restaurants by remember { mutableStateOf<List<Restaurant>>(emptyList()) }
+    // nearbyRestaurants is the live Places Nearby Search result for the user's location;
+    // searchResults is a live Places Text Search result scoped to the current query, or
+    // null when there's no active query (in which case nearbyRestaurants is shown instead).
+    var nearbyRestaurants by remember { mutableStateOf<List<Restaurant>>(emptyList()) }
+    var searchResults by remember { mutableStateOf<List<Restaurant>?>(null) }
+    var isLoadingNearby by remember { mutableStateOf(true) }
+    var isSearching by remember { mutableStateOf(false) }
+    var loadError by remember { mutableStateOf<String?>(null) }
+    var userLatLng by remember { mutableStateOf<LatLng?>(null) }
+
     var searchQuery by remember { mutableStateOf("") }
     var searchIntent by remember { mutableStateOf<SearchIntent?>(null) }
-    var isInterpretingSearch by remember { mutableStateOf(false) }
+    var reloadTrigger by remember { mutableStateOf(0) }
 
     val defaultLocation = LatLng(51.5074, -0.1278)
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(defaultLocation, 14f)
+    }
+
+    // Press-back-again-to-exit: the Map screen is the first screen reached after login, so a
+    // single back press here would otherwise exit the app with no confirmation.
+    var backPressedOnce by remember { mutableStateOf(false) }
+    BackHandler(enabled = true) {
+        if (backPressedOnce) {
+            (context as? Activity)?.finish()
+        } else {
+            backPressedOnce = true
+            Toast.makeText(context, "Press back again to exit", Toast.LENGTH_SHORT).show()
+        }
+    }
+    LaunchedEffect(backPressedOnce) {
+        if (backPressedOnce) {
+            delay(2000)
+            backPressedOnce = false
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -82,64 +117,65 @@ fun MapScreen(
         }
     }
 
-    LaunchedEffect(locationPermission.status.isGranted) {
-        if (locationPermission.status.isGranted &&
+    // Resolves the user's location, then loads live nearby restaurants from the Places API.
+    // Keyed on reloadTrigger too, so the Retry button on an error state can re-run this.
+    LaunchedEffect(locationPermission.status.isGranted, reloadTrigger) {
+        isLoadingNearby = true
+        loadError = null
+
+        val resolvedLatLng = if (locationPermission.status.isGranted &&
             ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
             == PackageManager.PERMISSION_GRANTED
         ) {
             val fusedClient = LocationServices.getFusedLocationProviderClient(context)
-            fusedClient.lastLocation.addOnSuccessListener { location ->
-                val latLng = if (location != null) {
-                    LatLng(location.latitude, location.longitude)
-                } else {
-                    defaultLocation
-                }
-                val seed = if (location != null) location.latitude to location.longitude
-                            else defaultLocation.latitude to defaultLocation.longitude
-                restaurants = RestaurantRepository.getSeedRestaurants(seed.first, seed.second)
-                cameraPositionState.move(CameraUpdateFactory.newLatLngZoom(latLng, 14f))
-            }
-        } else if (restaurants.isEmpty()) {
-            restaurants = RestaurantRepository.getSeedRestaurants(
-                defaultLocation.latitude, defaultLocation.longitude
-            )
+            val location = runCatching { fusedClient.lastLocation.await() }.getOrNull()
+            if (location != null) LatLng(location.latitude, location.longitude) else defaultLocation
+        } else {
+            defaultLocation
         }
+
+        userLatLng = resolvedLatLng
+        cameraPositionState.move(CameraUpdateFactory.newLatLngZoom(resolvedLatLng, 14f))
+
+        PlacesRepository.fetchNearby(resolvedLatLng.latitude, resolvedLatLng.longitude)
+            .onSuccess { nearbyRestaurants = it }
+            .onFailure { error ->
+                loadError = error.message ?: "Couldn't load nearby restaurants"
+            }
+        isLoadingNearby = false
     }
 
-    // Debounce the query, then ask Gemini to turn it into structured filters (cuisine,
-    // price range, vibe). Resetting searchIntent to null up front means the plain keyword
-    // filter below is used as an instant fallback while the AI call is in flight or if it fails.
-    LaunchedEffect(searchQuery) {
-        if (searchQuery.isBlank()) {
+    // Debounce the query, then run two things in parallel: a live Places Text Search scoped
+    // to the query (replacing the nearby list while a search is active), and a Gemini call
+    // that turns the query into structured filters (cuisine, price range, vibe) applied on
+    // top of whichever list is showing. Resetting both to their "no query" state up front
+    // means the plain substring filter is used as an instant fallback while both are in
+    // flight or if either fails.
+    LaunchedEffect(searchQuery, userLatLng) {
+        val location = userLatLng
+        if (searchQuery.isBlank() || location == null) {
+            searchResults = null
             searchIntent = null
-            isInterpretingSearch = false
+            isSearching = false
             return@LaunchedEffect
         }
         searchIntent = null
-        isInterpretingSearch = true
+        isSearching = true
         delay(600)
-        val result = GeminiSearchService.interpret(searchQuery)
-        isInterpretingSearch = false
-        searchIntent = result.getOrNull()
+
+        val textSearch = PlacesRepository.searchByText(location.latitude, location.longitude, searchQuery)
+        searchResults = textSearch.getOrNull()
+
+        val intentResult = GeminiSearchService.interpret(searchQuery)
+        searchIntent = intentResult.getOrNull()
+        isSearching = false
     }
 
-    val filteredRestaurants = if (searchQuery.isBlank()) {
-        restaurants
-    } else {
-        val intent = searchIntent
-        if (intent != null && !intent.isEmpty) {
-            restaurants.filter { restaurant ->
-                (intent.cuisine == null || restaurant.cuisine.contains(intent.cuisine, ignoreCase = true)) &&
-                (intent.priceRange == null || restaurant.priceRange.equals(intent.priceRange, ignoreCase = true)) &&
-                (intent.vibe == null || restaurant.vibeTags.any { tag -> tag.contains(intent.vibe, ignoreCase = true) })
-            }
-        } else {
-            restaurants.filter {
-                it.name.contains(searchQuery, ignoreCase = true) ||
-                it.cuisine.contains(searchQuery, ignoreCase = true)
-            }
-        }
-    }
+    val filteredRestaurants = RestaurantSearch.filter(
+        restaurants = searchResults ?: nearbyRestaurants,
+        query = searchQuery,
+        intent = searchIntent
+    )
 
     Scaffold(
         bottomBar = {
@@ -207,7 +243,7 @@ fun MapScreen(
                 placeholder = { Text("Try \"quiet cheap place for a date\"...") },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                 trailingIcon = {
-                    if (isInterpretingSearch) {
+                    if (isSearching) {
                         CircularProgressIndicator(modifier = Modifier.size(20.dp))
                     }
                 },
@@ -222,6 +258,40 @@ fun MapScreen(
                 ),
                 singleLine = true
             )
+
+            if (isLoadingNearby) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = 96.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else if (loadError != null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Couldn't load nearby restaurants.\n$loadError",
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                        Button(
+                            onClick = { reloadTrigger++ },
+                            modifier = Modifier.padding(top = 16.dp)
+                        ) {
+                            Text("Retry")
+                        }
+                    }
+                }
+            }
         }
     }
 }

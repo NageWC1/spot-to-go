@@ -22,7 +22,7 @@ data class SearchIntent(
  */
 object GeminiSearchService {
 
-    private const val MODEL = "gemini-2.0-flash"
+    private const val MODEL = "gemini-3.6-flash"
     private const val ENDPOINT =
         "https://generativelanguage.googleapis.com/v1beta/models/$MODEL:generateContent"
 
