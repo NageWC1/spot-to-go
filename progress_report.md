@@ -1,7 +1,7 @@
 # Project Progress Report
 ## Spot To Go — Android Dissertation Project
-**Date:** 17 August 2026 (originally 4 June 2026, updated each session — see dated entries below)
-**Current Phase:** Android Development — core screens, navigation, Firebase Auth, and Gemini AI search complete; direction decided to move restaurant data (Places API), reviews, and video (YouTube Data API) to fully dynamic sourcing — paused pending resolution of Gemini API student access. **The final report is a complete full draft, revised against supervisor (Edwin) feedback, checked against the official submission brief, and rebuilt/verified as a compiled PDF** — 34 pages total, ~27 pages of core material (well under the 40-page cap). The Word version, flagged as stale on 16 August, has since been regenerated from the same source and now matches the PDF exactly, and Figure 8 was rearranged again into a clearer user-story order (see Session — 17 August 2026 below). Still open: student number needed to rename the PDF to the required `studentnumber-dissertation.pdf` format (see Session — 16 August 2026 below).
+**Date:** 19 August 2026 (originally 4 June 2026, updated each session — see dated entries below)
+**Current Phase:** Final report — **DONE.** Every section is complete and verified: Abstract, Acknowledgements, Statement of AI Usage, full body (Introduction through Conclusion), References, and all 11 figures/diagrams — compiled and confirmed as a 34-page PDF with 0 errors and 0 undefined references. The Word (.docx) version matches the PDF exactly (see Session — 17/18 August 2026 below). Android development (Places API integration, Firebase Auth, Gemini AI search, all 11 screens) is also complete and tested on a physical device. **The only outstanding item across the whole project is the Gantt chart deliverable** — a properly built chart from dedicated Gantt-chart software/tooling (per supervisor Edwin's request), separate from the report's own embedded `pgfgantt` figure. This is now the single next priority. Still open, but not blocking: student number needed to rename the PDF to the required `studentnumber-dissertation.pdf` format (see Session — 16 August 2026 below).
 
 ---
 
@@ -13,7 +13,9 @@
 | Proposal Planning | DONE |
 | Proposal Writing | DONE |
 | Proof Reading & Validation | DONE |
-| Android Development | IN PROGRESS |
+| Android Development | DONE |
+| Final Report Writing | DONE |
+| Gantt Chart Deliverable | **NEXT PRIORITY** |
 
 ---
 
@@ -126,10 +128,11 @@
 | Phase 3 | Restaurant markers (seeded data) | DONE |
 | Phase 4 | Restaurant detail + video + directions | DONE |
 | Phase 5 | Gemini API — Agentic AI Search Bar | DONE — natural language query → structured filters, tested on device |
-| Phase 6 | Live Places API integration — now scoped as full dynamic pipeline (Gemini → Places search → real details/reviews → YouTube Data API video) | **PAUSED** — direction agreed and documented above, blocked on resolving Gemini API student access before implementation starts |
+| Phase 6 | Live Places API integration | DONE — restaurant discovery and search now run against live Google Places API data rather than the placeholder list (see Section 8 of the report) |
 | Phase 7 | Firebase Auth (login/register) | DONE — tested on physical device, map gated behind login |
-| Phase 8 | UI polish, loading indicators, error handling | IN PROGRESS — 11 screens implemented incl. bottom nav, password visibility, loading spinners |
-| Phase 9 | Final report writing | FULL DRAFT COMPLETE — all sections, figures, and diagrams in place; refining presentation per supervisor feedback (Edwin's 16 August notes on Figure 8 and the Gantt chart actioned and compiled). Word (.docx) version regenerated on 17 August and now matches the PDF — previously stale, missing sections and diagrams |
+| Phase 8 | UI polish, loading indicators, error handling | DONE — 11 screens implemented incl. bottom nav, password visibility, loading spinners |
+| Phase 9 | Final report writing | DONE — complete full draft, all sections/figures/diagrams in place, checked against the submission brief, compiled and verified (34 pages, 0 errors, 0 undefined references). Word (.docx) version matches the PDF exactly |
+| Phase 10 | Gantt chart deliverable | **NEXT PRIORITY** — the only item remaining on the whole project; see Session — 19 August 2026 below |
 
 ---
 
@@ -473,6 +476,21 @@
 - The first diff pass showed apostrophes rendering as `�` on the docx side, which looked like real text corruption at a glance. Checked the actual character codepoint directly (`0x2019`, a correct Unicode right single quotation mark) and confirmed it was only a terminal display limitation in this session's tooling, not a defect in the file — reported that distinction rather than the misleading raw diff output.
 - **Real differences confirmed:** (1) the cover page, expected since it was just rebuilt independently for Word; (2) the PDF carries a full, page-numbered Table of Contents that the Word document has never had at any point in this project's history — a genuine structural gap, separate from the formatting fixes above. Everything else — the full report body, abstract, and reference list — matched word-for-word between the two files.
 - Flagged the missing Word Table of Contents to the project owner as the next open template-mismatch item; not yet actioned.
+
+---
+
+## Session — 19 August 2026
+
+### Gantt Chart Deliverable — Work Started, Now the Sole Remaining Task
+
+- **Context:** supervisor Edwin's 16 August feedback asked for the Gantt chart to be "built with dedicated Gantt-chart software," distinct from the report's own `pgfgantt` figure (Section 8.1). That figure is done; this session's work is toward the separate, dedicated-tool deliverable.
+- **`final report/gantt/sample.mpp` inspected:** a downloaded Microsoft Project file turned out to be a generic tutorial template ("AlvinThePM — MSP Gantt Chart Exercise," a house-building example) with no real project content — useful only as a structural reference, not a starting point with real data.
+- **Tooling installed to work with `.mpp` files:** a standalone JDK (Eclipse Temurin 17) plus the Python `mpxj`/`JPype1` libraries, since MS Project's binary format can only be read (not written) by any available open-source tool — MPXJ's writer only supports JSON/MPX/MSPDI/PLANNER/PMXML/XER/SDEF, not native `.mpp`.
+- **Generated `final report/gantt/Spot_To_Go_Gantt.xml`** (MSPDI format) from the actual WP1–WP7 schedule already in the report's Gantt figure, mapped onto real calendar weeks (Monday 27 April – Friday 21 August 2026, matching the mid-August submission deadline). MS Project opens this natively; a one-click File → Save As → Project File produces a true `.mpp`.
+- **Populated the downloaded free TeamGantt Excel template** (`excel-gantt-chart-template.xlsx` → `Spot_To_Go_Gantt_Excel.xlsx`) with the same WP1–WP7 schedule: full Task Table (WBS numbers, dates, durations, % complete, assignee, priority, predecessors), corrected Dashboard formulas (originally hardcoded to the template's 12 sample rows, now generalised to the real 28-row schedule), and a rebuilt floating-bar Gantt chart bound to the new data.
+- **Also exported `Spot_To_Go_Gantt.csv`** as a fallback for online Gantt-chart tools that prefer CSV import over Excel/XML.
+- **Committed and pushed** (`d6940b2`) alongside the routine PDF recompile.
+- **What's actually left:** decide which of these exports becomes the final submitted artifact (native `.mpp` via MS Project Save-As, the populated Excel template, or an online tool import), and produce that final file. Everything else on the project is complete.
 
 ---
 
