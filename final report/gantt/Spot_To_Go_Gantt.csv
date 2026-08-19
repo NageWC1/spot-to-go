@@ -1,29 +1,29 @@
 Task Name,Start Date,End Date,Duration,% Complete,Group
-WP1: Literature Review,2026-04-27,2026-05-22,,,WP1: Literature Review
-Requirements & background analysis,2026-04-27,2026-05-08,,,WP1: Literature Review
-Literature review (4 areas),2026-04-27,2026-05-15,,,WP1: Literature Review
-Proposal writing & submission,2026-05-11,2026-05-22,,,WP1: Literature Review
-WP2: Setup & Architecture,2026-05-04,2026-05-29,,,WP2: Setup & Architecture
-Android Studio project scaffold,2026-05-04,2026-05-15,,,WP2: Setup & Architecture
-Dependency & Gradle configuration,2026-05-11,2026-05-22,,,WP2: Setup & Architecture
-API keys & Cloud Console setup,2026-05-11,2026-05-29,,,WP2: Setup & Architecture
-WP3: Maps & Location,2026-05-25,2026-07-03,,,WP3: Maps & Location
-Google Map integration & GPS centring,2026-05-25,2026-06-12,,,WP3: Maps & Location
-Restaurant markers (seed data),2026-06-01,2026-06-19,,,WP3: Maps & Location
-Location permission handling,2026-06-08,2026-06-19,,,WP3: Maps & Location
-Firebase Authentication (login/register),2026-06-15,2026-07-03,,,WP3: Maps & Location
-WP4: Detail & Video,2026-06-22,2026-07-17,,,WP4: Detail & Video
-Restaurant detail screen,2026-06-22,2026-07-03,,,WP4: Detail & Video
-Video screen & YouTube intent,2026-06-29,2026-07-10,,,WP4: Detail & Video
-Directions screen & Maps intent,2026-07-06,2026-07-17,,,WP4: Detail & Video
-WP5: Search & UI Polish,2026-07-06,2026-07-31,,,WP5: Search & UI Polish
-Keyword search bar,2026-07-06,2026-07-17,,,WP5: Search & UI Polish
-Gemini AI natural-language search,2026-07-13,2026-07-24,,,WP5: Search & UI Polish
-Bottom navigation & UI fixes,2026-07-20,2026-07-31,,,WP5: Search & UI Polish
-WP6: Testing & Writing,2026-07-20,2026-08-14,,,WP6: Testing & Writing
-Manual functional testing & bug fixes,2026-07-20,2026-08-07,,,WP6: Testing & Writing
-Usability heuristic review,2026-07-27,2026-08-07,,,WP6: Testing & Writing
-Final report writing,2026-07-27,2026-08-14,,,WP6: Testing & Writing
-WP7: Report & Presentation,2026-08-10,2026-08-21,,,WP7: Report & Presentation
-Report review & polish,2026-08-10,2026-08-21,,,WP7: Report & Presentation
-Presentation preparation,2026-08-10,2026-08-21,,,WP7: Report & Presentation
+WP1: Literature Review,2026-04-27,2026-05-22,26,100,WP1: Literature Review
+Requirements & background analysis,2026-04-27,2026-05-08,12,100,WP1: Literature Review
+Literature review (4 areas),2026-04-27,2026-05-15,19,100,WP1: Literature Review
+Proposal writing & submission,2026-05-11,2026-05-22,12,100,WP1: Literature Review
+WP2: Setup & Architecture,2026-05-04,2026-05-29,26,100,WP2: Setup & Architecture
+Android Studio project scaffold,2026-05-04,2026-05-15,12,100,WP2: Setup & Architecture
+Dependency & Gradle configuration,2026-05-11,2026-05-22,12,100,WP2: Setup & Architecture
+API keys & Cloud Console setup,2026-05-11,2026-05-29,19,100,WP2: Setup & Architecture
+WP3: Maps & Location,2026-05-25,2026-07-03,40,100,WP3: Maps & Location
+Google Map integration & GPS centring,2026-05-25,2026-06-12,19,100,WP3: Maps & Location
+Restaurant markers (seed data),2026-06-01,2026-06-19,19,100,WP3: Maps & Location
+Location permission handling,2026-06-08,2026-06-19,12,100,WP3: Maps & Location
+Firebase Authentication (login/register),2026-06-15,2026-07-03,19,100,WP3: Maps & Location
+WP4: Detail & Video,2026-06-22,2026-07-17,26,100,WP4: Detail & Video
+Restaurant detail screen,2026-06-22,2026-07-03,12,100,WP4: Detail & Video
+Video screen & YouTube intent,2026-06-29,2026-07-10,12,100,WP4: Detail & Video
+Directions screen & Maps intent,2026-07-06,2026-07-17,12,100,WP4: Detail & Video
+WP5: Search & UI Polish,2026-07-06,2026-07-31,26,100,WP5: Search & UI Polish
+Keyword search bar,2026-07-06,2026-07-17,12,100,WP5: Search & UI Polish
+Gemini AI natural-language search,2026-07-13,2026-07-24,12,100,WP5: Search & UI Polish
+Bottom navigation & UI fixes,2026-07-20,2026-07-31,12,100,WP5: Search & UI Polish
+WP6: Testing & Writing,2026-07-20,2026-08-14,26,100,WP6: Testing & Writing
+Manual functional testing & bug fixes,2026-07-20,2026-08-07,19,100,WP6: Testing & Writing
+Usability heuristic review,2026-07-27,2026-08-07,12,100,WP6: Testing & Writing
+Final report writing,2026-07-27,2026-08-14,19,100,WP6: Testing & Writing
+WP7: Report & Presentation,2026-08-10,2026-08-21,12,100,WP7: Report & Presentation
+Report review & polish,2026-08-10,2026-08-21,12,100,WP7: Report & Presentation
+Presentation preparation,2026-08-10,2026-08-21,12,100,WP7: Report & Presentation
