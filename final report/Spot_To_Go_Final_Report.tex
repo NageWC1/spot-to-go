@@ -12,6 +12,7 @@
 \usepackage{booktabs}
 \usepackage{array}
 \usepackage{natbib}
+\usepackage{etoolbox}
 \usepackage{times}
 \usepackage{graphicx}
 \usepackage{float}
@@ -65,6 +66,18 @@
     {\tiny\itshape #3}
   \end{minipage}%
 }
+
+% natbib's author-year styles (e.g. apalike) suppress the \bibitem label by
+% design, since the author-year text is already in the entry body. That left
+% the reference list with no visible marker per entry, so this renumbers each
+% entry sequentially without changing the (Author, Year) in-text citations.
+\newcounter{refentrynum}
+\makeatletter
+\AtBeginEnvironment{thebibliography}{%
+  \setcounter{refentrynum}{0}%
+  \renewcommand\@biblabel[1]{[\stepcounter{refentrynum}\arabic{refentrynum}]}%
+}
+\makeatother
 
 % ============================================================
 \begin{document}
@@ -691,57 +704,8 @@ The work was planned against a fixed submission deadline, so the project was div
 
 \begin{figure}[H]
 \centering
-\resizebox{\textwidth}{!}{%
-\begin{ganttchart}[
-    vgrid, hgrid,
-    x unit=0.6cm,
-    y unit chart=0.45cm,
-    y unit title=0.6cm,
-    bar height=0.6,
-    group height=0.6,
-    bar/.append style={fill=orange!70!black},
-    group/.append style={fill=blue!30, draw=blue!60!black},
-    bar label font=\scriptsize,
-    group label font=\bfseries\scriptsize,
-    title label font=\bfseries\scriptsize
-]{1}{17}
-\gantttitle{Apr}{1}
-\gantttitle{May}{5}
-\gantttitle{Jun}{5}
-\gantttitle{Jul}{4}
-\gantttitle{Aug}{2} \\
-\gantttitlelist{1,...,17}{1} \\
-\ganttgroup{WP1: Literature Review}{1}{4} \\
-\ganttbar{Requirements \& background analysis}{1}{2} \\
-\ganttbar{Literature review (4 areas)}{1}{3} \\
-\ganttbar{Proposal writing \& submission}{3}{4} \\
-\ganttgroup{WP2: Setup \& Architecture}{2}{5} \\
-\ganttbar{Android Studio project scaffold}{2}{3} \\
-\ganttbar{Dependency \& Gradle configuration}{3}{4} \\
-\ganttbar{API keys \& Cloud Console setup}{3}{5} \\
-\ganttgroup{WP3: Maps \& Location}{5}{10} \\
-\ganttbar{Google Map integration \& GPS centring}{5}{7} \\
-\ganttbar{Restaurant markers (seed data)}{6}{8} \\
-\ganttbar{Location permission handling}{7}{8} \\
-\ganttbar{Firebase Authentication (login/register)}{8}{10} \\
-\ganttgroup{WP4: Detail \& Video}{9}{12} \\
-\ganttbar{Restaurant detail screen}{9}{10} \\
-\ganttbar{Video screen \& YouTube intent}{10}{11} \\
-\ganttbar{Directions screen \& Maps intent}{11}{12} \\
-\ganttgroup{WP5: Search \& UI Polish}{11}{14} \\
-\ganttbar{Keyword search bar}{11}{12} \\
-\ganttbar{Gemini AI natural-language search}{12}{13} \\
-\ganttbar{Bottom navigation \& UI fixes}{13}{14} \\
-\ganttgroup{WP6: Testing \& Writing}{13}{16} \\
-\ganttbar{Manual functional testing \& bug fixes}{13}{15} \\
-\ganttbar{Usability heuristic review}{14}{15} \\
-\ganttbar{Final report writing}{14}{16} \\
-\ganttgroup{WP7: Report \& Presentation}{16}{17} \\
-\ganttbar{Report review \& polish}{16}{17} \\
-\ganttbar{Presentation preparation}{16}{17}
-\end{ganttchart}%
-}
-\caption[Project schedule Gantt chart (WP1--WP7).]{Project schedule Gantt chart across seven work packages (WP1--WP7) and their subtasks.}
+\includegraphics[width=\textwidth]{images/gantt_chart.png}
+\caption[Project schedule Gantt chart (WP1--WP7).]{Project schedule Gantt chart across seven work packages (WP1--WP7) and their subtasks, created using Microsoft Power BI \citep{powerbi}.}
 \label{fig:gantt}
 \end{figure}
 \addcontentsline{toc}{subsubsection}{Project Schedule Gantt Chart}

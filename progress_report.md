@@ -1,7 +1,7 @@
 # Project Progress Report
 ## Spot To Go — Android Dissertation Project
 **Date:** 19 August 2026 (originally 4 June 2026, updated each session — see dated entries below)
-**Current Phase:** Final report — **DONE.** Every section is complete and verified: Abstract, Acknowledgements, Statement of AI Usage, full body (Introduction through Conclusion), References, and all 11 figures/diagrams — compiled and confirmed as a 34-page PDF with 0 errors and 0 undefined references. The Word (.docx) version matches the PDF exactly (see Session — 17/18 August 2026 below). Android development (Places API integration, Firebase Auth, Gemini AI search, all 11 screens) is also complete and tested on a physical device. **The only outstanding item across the whole project is the Gantt chart deliverable** — a properly built chart from dedicated Gantt-chart software/tooling (per supervisor Edwin's request), separate from the report's own embedded `pgfgantt` figure. The project owner has settled on building it in **Power BI**, importing `final report/gantt/Spot_To_Go_Gantt.csv` (WP1–WP7 schedule, with day-count durations and 100% complete on every row). This is now the single next priority. Still open, but not blocking: student number needed to rename the PDF to the required `studentnumber-dissertation.pdf` format (see Session — 16 August 2026 below).
+**Current Phase:** Final report — **DONE, including the Gantt chart deliverable.** Every section is complete and verified: Abstract, Acknowledgements, Statement of AI Usage, full body (Introduction through Conclusion), References, and all figures/diagrams. The dedicated Gantt-chart deliverable supervisor Edwin asked for (16 August feedback) was built in **Power BI** from `final report/gantt/Spot_To_Go_Gantt.csv`, exported as an image, and embedded into Section 8.1 in place of the earlier `pgfgantt` figure — the caption credits Power BI and a matching reference was added to `references.bib`. The reference list was also fixed to show sequential numbering (`apalike`/`natbib` had been suppressing the `\bibitem` label entirely, making the list look unnumbered), and the Gantt image was upscaled with a Lanczos + unsharp pass so it prints sharp at full text width. Report recompiled clean: 33 pages, 0 errors, 0 undefined references (see Session — 19 August 2026 below). Android development (Places API integration, Firebase Auth, Gemini AI search, all 11 screens) is also complete and tested on a physical device. **No outstanding items remain on the core deliverables.** Still open, but not blocking: student number needed to rename the PDF to the required `studentnumber-dissertation.pdf` format (see Session — 16 August 2026 below).
 
 ---
 
@@ -15,7 +15,7 @@
 | Proof Reading & Validation | DONE |
 | Android Development | DONE |
 | Final Report Writing | DONE |
-| Gantt Chart Deliverable | **NEXT PRIORITY** |
+| Gantt Chart Deliverable | DONE |
 
 ---
 
@@ -132,7 +132,7 @@
 | Phase 7 | Firebase Auth (login/register) | DONE — tested on physical device, map gated behind login |
 | Phase 8 | UI polish, loading indicators, error handling | DONE — 11 screens implemented incl. bottom nav, password visibility, loading spinners |
 | Phase 9 | Final report writing | DONE — complete full draft, all sections/figures/diagrams in place, checked against the submission brief, compiled and verified (34 pages, 0 errors, 0 undefined references). Word (.docx) version matches the PDF exactly |
-| Phase 10 | Gantt chart deliverable — build in Power BI from `Spot_To_Go_Gantt.csv` | **NEXT PRIORITY** — the only item remaining on the whole project; see Session — 19 August 2026 below |
+| Phase 10 | Gantt chart deliverable — build in Power BI from `Spot_To_Go_Gantt.csv` | DONE — built in Power BI, exported and embedded into Section 8.1 of the report; see Session — 19 August 2026 below |
 
 ---
 
@@ -494,6 +494,17 @@
 - **Direction changed: project owner decided to build the chart in Power BI instead.** Simplified the plan back down to a single CSV export and dropped the other formats — `Spot_To_Go_Gantt.xml` (MSPDI), `Spot_To_Go_Gantt_Excel.xlsx`, the downloaded `excel-gantt-chart-template.xlsx`, and `sample.mpp` (the generic tutorial file it was inspected from) were all removed, since none are needed for a Power BI import.
 - **`Spot_To_Go_Gantt.csv` rebuilt to Power BI's requirements:** added a `Duration` column (calendar days inclusive, `End − Start + 1`) and set `% Complete` to 100 for every row, per the project owner's instruction — all WP1–WP7 work is done, so the chart should show it that way. Dates kept in unambiguous ISO 8601 (`YYYY-MM-DD`) format.
 - **What's actually left:** import `final report/gantt/Spot_To_Go_Gantt.csv` into Power BI and build the chart there. This is now the only remaining task on the whole project.
+
+### Gantt Chart Deliverable — Completed, Embedded in Report
+
+- **Chart built in Power BI** by the project owner from `Spot_To_Go_Gantt.csv` and exported as `final report/gantt/spot to go - gantt chart.png` — a stacked bar chart of all 28 WP1–WP7 tasks/subtasks against the Apr–Aug 2026 timeline, colour-coded by work package.
+- **Git sync checked first:** confirmed local `main` fully up to date with `origin/main` (0 ahead/0 behind) before touching any files.
+- **Embedded into the report:** replaced the report's own `pgfgantt`-drawn chart in Section 8.1 (`fig:gantt`) with `\includegraphics` of the new Power BI export, copied to `final report/images/gantt_chart.png` to match the report's existing image convention. This is a different figure from the dedicated-tool deliverable Edwin asked for — the report now shows the actual Power BI chart directly rather than a hand-coded LaTeX approximation of it.
+- **Caption updated and reference added:** caption now reads "...created using Microsoft Power BI (Microsoft, 2024)"; added a matching `@misc{powerbi, ...}` entry to `references.bib` (same style as the existing `google_places`/`android_location`/`firebase_auth` web entries), cited via `\citep{powerbi}`.
+- **Reference list numbering fixed:** the `apalike` bibliography style used with `natbib` suppresses the `\bibitem` optional label by design for author-year styles, so the reference list had no visible marker at all in front of each entry — reported by the project owner as looking "empty." Fixed with an `etoolbox` `\AtBeginEnvironment{thebibliography}` hook that renumbers each entry `[1]`, `[2]`, ... via a dedicated counter, without touching the existing `(Author, Year)` in-text citation style anywhere in the body text. References now run `[1]`–`[16]`.
+- **Image sharpness fixed:** the Power BI export was only 1590×679px, which looked visibly blurry stretched across the report's full text width. No Power BI access in this session to re-export at higher resolution, so upscaled locally with `ffmpeg` (Lanczos scale ×2.5 to 3975×1697, plus a light `unsharp` pass) — genuinely sharper text/edges in the final PDF, confirmed by visual inspection before and after.
+- **Rebuilt and verified:** `latexmk` (MiKTeX) full rebuild after each change — final compile clean at 33 pages, 0 errors, 0 undefined references/citations. Visually confirmed the Gantt figure (now Figure 10), its updated caption, and the numbered reference list `[1]`–`[16]` including the new Power BI entry `[13]`.
+- **Result: the Gantt chart deliverable and the report are both fully complete.** No outstanding items remain on the project; the only still-open (non-blocking) item is the student number needed to rename the PDF per the submission brief (see Session — 16 August 2026).
 
 ---
 
